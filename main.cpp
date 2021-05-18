@@ -9,7 +9,7 @@ sf::RenderWindow window(sf::VideoMode(width, height), "Intranet path finder");
 
 int m[4][4] = {
 			   {0, 10, 0, 0},
-			   {12, 0, 20, 15},
+			   {12, 0, 2, 15},
 			   {0, 3, 0, 7},
 			   {0, 8, 0, 0}
 			  };
@@ -18,7 +18,7 @@ int main() {
 
 	std::vector<size_t> my_path;
 
-	engine::DFS(my_path, m, 3, 0);
+	engine::BFS(my_path, m, 3, 0);
 	std::cout << "\n";
 
 	for (auto value : my_path) {
