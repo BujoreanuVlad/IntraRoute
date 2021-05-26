@@ -20,9 +20,9 @@ int m[NUM_NODES][NUM_NODES] = {
 
 structures::Node nodes[NUM_NODES]; 
 
-void dragNode(structures::Node &node) {
+void generateGraph() {
 
-
+	structures::Edge edge1 = structures::newEdge(&nodes[0], &nodes[1], 10);
 }
 
 int main() {
@@ -35,18 +35,14 @@ int main() {
 		return 1;
 
 	std::vector<size_t> my_path;
+	generateGraph();
 
 	for (size_t i {}; i < NUM_NODES; i++) {
 		nodes[i] = structures::newNode(1, i+1);
 		structures::setPosition(nodes[i], 50 + (i/5) * 120, 50 + (i%5) * 100);
 	}
 	
-	engine::BFS(my_path, m, 3, 0);
-
-	for (auto value : my_path) {
-
-		std::cout << ++value << " ";
-	}
+	bool once {true};
 	
 	//node that is clicked
 	//And initial coordinates of mouse
@@ -95,6 +91,18 @@ int main() {
 		window->clear(background);
 
 		structures::draw(*window, nodes, m);
+
+		if (once) {
+
+			engine::DFS(*window, my_path, nodes, m, 3, 0);
+
+			for (auto value : my_path) {
+
+				std::cout << ++value << " ";
+			}
+
+			once = false;
+		}
 
 		window->display();
 	}

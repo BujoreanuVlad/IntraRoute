@@ -42,6 +42,11 @@ namespace structures {
 		   return true;
 	}
 
+	void lightUp(Node &node, const sf::Color color) {
+		
+		node.rect.setOutlineColor(color);
+	}
+
 	sf::Text makeText(const Node &node) {
 
 		sf::Text text;
@@ -53,5 +58,16 @@ namespace structures {
 		text.setPosition(position.x + 10, position.y + 2);
 
 		return text;
+	}
+
+	Edge newEdge(Node *from, Node *to, int cost) {
+
+		   Edge edge;
+
+		   edge.from = from;
+		   edge.to = to;
+		   edge.cost = cost;
+
+		   return edge;
 	}
 }

@@ -16,6 +16,12 @@ namespace structures {
 		sf::RectangleShape rect;
 	};
 
+	struct Edge {
+
+		   Node *from, *to;
+		   int cost;
+	};
+
 	//Default width and height of the nodes' RectangleShape
 	const float width {100};
 	const float height {50};
@@ -27,8 +33,12 @@ namespace structures {
 	void setPosition(Node &node, float x, float y);
 	//Checks if a certain coordinate is inside the rectangle defined by node's rect
 	bool isInside(const Node &node, const sf::Vector2i &position);
+	//Changes the color of the border
+	void lightUp(Node &node, const sf::Color color = sf::Color::Cyan);
+	
+	Edge newEdge(Node *from, Node *to, int cost);
 
-	//Helper function
+	//Helper function for drawing text
 	sf::Text makeText(const Node &node);
 	//Template to draw all the nodes on a RenderWindow window
 	template <size_t N>
@@ -58,6 +68,8 @@ namespace structures {
 				}
 			}
 		}
+
+		window.display();
 	}
 }
 
