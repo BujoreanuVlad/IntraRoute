@@ -1,4 +1,4 @@
-#include "structures.h"
+#include "structures.hpp"
 
 namespace {
 

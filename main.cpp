@@ -1,7 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include "engine.h"
-#include "structures.h"
+#include "engine.hpp"
+#include "structures.hpp"
 
 const float width {1000};
 const float height {800};

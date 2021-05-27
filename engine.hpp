@@ -1,14 +1,18 @@
 #if !defined ENGINE_H
 #define ENGINE_HG
 #include <vector>
-#include "structures.h"
+#include "structures.hpp"
 #include <SFML/Graphics.hpp>
 #include <ctime>
 #include <iostream>
 
 namespace engine {
 
-	float time_link {1};
+	extern float time_link;
+	const sf::Color orange(252, 147, 0);
+	
+	//Waits for the duration of the time_link variable which is measured in real-life seconds
+	void wait();
 
 	template <size_t N>
 	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node = 0, const size_t current_node = 0) {
@@ -17,15 +21,11 @@ namespace engine {
 		static unsigned int min_value {static_cast<unsigned>(~0)};
 		static std::vector<size_t> current_path;
 
-		structures::lightUp(nodes[current_node], sf::Color::Red);
+		structures::lightUp(nodes[current_node], orange);
 		current_path.push_back(current_node);
 		structures::draw(window, nodes, m);
 
-		{
-			float t = std::clock();
-
-			while ((std::clock() - t) / CLOCKS_PER_SEC < time_link);
-		}
+		wait();
 
 		if (current_node == end_node) {
 
@@ -48,9 +48,11 @@ namespace engine {
 				if (total_value < min_value) {
 					m[current_node][i] *= -1;
 					m[i][current_node] *= -1;
+					structures::lightUp(nodes[current_node], sf::Color::Red);
 
 					DFS(window, v, nodes, m, end_node, i);
 
+					structures::lightUp(nodes[current_node], orange);					
 					m[current_node][i] *= -1;
 					m[i][current_node] *= -1;
 				}
@@ -62,11 +64,7 @@ namespace engine {
 		structures::lightUp(nodes[current_node]);
 		current_path.pop_back();
 		structures::draw(window, nodes, m);
-		{
-			float t = std::clock();
-
-			while ((std::clock() - t) / CLOCKS_PER_SEC < time_link);
-		}
+		wait();
 	}
 
 	template <size_t N>
