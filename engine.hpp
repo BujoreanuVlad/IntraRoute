@@ -13,13 +13,12 @@ namespace engine {
 	
 	//Waits for the duration of the time_link variable which is measured in real-life seconds
 	void wait();
+	//Resets all the static variables from the DFS template
+	void reset();
 
+	//Helper template for the other DFS template which is the one which will be called by the other translation units 
 	template <size_t N>
-	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node = 0, const size_t current_node = 0) {
-
-		static int total_value {0};
-		static unsigned int min_value {static_cast<unsigned>(~0)};
-		static std::vector<size_t> current_path;
+	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node, const size_t current_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool (&visited)[N]) {
 
 		structures::lightUp(nodes[current_node], orange);
 		current_path.push_back(current_node);
@@ -36,8 +35,11 @@ namespace engine {
 
 			structures::lightUp(nodes[current_node]);
 			current_path.pop_back();
+			structures::draw(window, nodes, m);
 			return;
 		}
+
+		visited[current_node] = true;
 
 		for (int i {}; i < N; i++) {
 		
@@ -45,26 +47,41 @@ namespace engine {
 
 				total_value += m[current_node][i];
 
-				if (total_value < min_value) {
+				if (!visited[i] && total_value < min_value) {
 					m[current_node][i] *= -1;
 					m[i][current_node] *= -1;
 					structures::lightUp(nodes[current_node], sf::Color::Red);
 
-					DFS(window, v, nodes, m, end_node, i);
+					DFS(window, v, nodes, m, end_node, i, total_value, min_value, current_path, visited);
 
 					structures::lightUp(nodes[current_node], orange);					
 					m[current_node][i] *= -1;
 					m[i][current_node] *= -1;
+
+					structures::draw(window, nodes, m);
+					wait();
 				}
 
 				total_value -= m[current_node][i];
 			}
+
+			visited[current_node] = false;
 		}
 
 		structures::lightUp(nodes[current_node]);
 		current_path.pop_back();
 		structures::draw(window, nodes, m);
-		wait();
+	}
+
+	template <size_t N>
+	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node = 0, const size_t current_node = 0) {
+
+		int total_value {0};
+		unsigned int min_value {static_cast<unsigned>(~0)};
+		std::vector<size_t> current_path;
+		bool visited[N] {};
+		
+		DFS(window, v, nodes, m, end_node, current_node, total_value, min_value, current_path, visited);
 	}
 
 	template <size_t N>
@@ -89,9 +106,9 @@ namespace engine {
 	}
 
 	template <size_t N>
-	void BFS(std::vector<size_t> &v, int (&m)[N][N], const size_t end_node = 0, const size_t start_node = 0) {
+	void BFS(sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node = 0, const size_t start_node = 0) {
 		
-		int nodes[N] {};
+		int node_values[N] {};
 		size_t *buff, *queue;
 		size_t buff_size {}, queue_size {1};
 		size_t index {};
@@ -103,15 +120,22 @@ namespace engine {
 
 			size_t current_node {queue[index++]};
 
-			for (size_t i {}; i < N; i++) {
+			structures::lightUp(nodes[current_node], orange);
+			structures::draw(window, nodes, m);
+			wait();
+
+			for (size_t i {}; i < N && current_node != end_node; i++) {
 
 				if (i == start_node)
 					continue;
 
-				int sum {m[current_node][i] + nodes[current_node]};
-				if (sum < nodes[i] || !nodes[i]) {
-					nodes[i] = sum;
+				int sum {m[current_node][i] + node_values[current_node]};
+				if (sum < node_values[i] || !node_values[i]) {
+					node_values[i] = sum;
 					buff[buff_size++] = i;
+					structures::lightUp(nodes[i], sf::Color::Yellow);
+					structures::draw(window, nodes, m);
+					wait();
 				}
 			}
 
@@ -125,12 +149,16 @@ namespace engine {
 				buff = new size_t[N];
 				buff_size = 0;
 			}
+
+			structures::lightUp(nodes[current_node], sf::Color::Red);
+			structures::draw(window, nodes, m);
+			wait();
 		}
 		
 		delete[] queue;
 		delete[] buff;
 
-		reconstruct_path(v, nodes, m, end_node, start_node);
+		reconstruct_path(v, node_values, m, end_node, start_node);
 	}
 }
 #endif
