@@ -35,6 +35,13 @@ namespace structures {
 	bool isInside(const Node &node, const sf::Vector2i &position);
 	//Changes the color of the border
 	void lightUp(Node &node, const sf::Color color = sf::Color::Cyan);
+	//Resets the colors of all the nodes to Cyan
+	template <size_t N>
+	void reset(Node (&nodes)[N]) {
+
+		for (size_t i {}; i < N; i++)
+			lightUp(nodes[i]);
+	}
 	
 	Edge newEdge(Node *from, Node *to, int cost);
 

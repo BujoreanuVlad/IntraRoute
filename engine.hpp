@@ -8,15 +8,22 @@
 
 namespace engine {
 
+	/*
+	Time link variable which maps 1 real world second to a virtual time.
+	For example a time_link variable of 1 would mean that the program waits 1
+	real-life second for each action (when said action calls the wait() function).
+	A time_link of 2 would wait 2 real-life seconds for each action, as if it 
+	would take us 2 seconds for 1 virtual second to pass.
+	*/
 	extern float time_link;
 	const sf::Color orange(252, 147, 0);
 	
 	//Waits for the duration of the time_link variable which is measured in real-life seconds
 	void wait();
-	//Resets all the static variables from the DFS template
-	void reset();
+	//Changes the time_link variable
+	void setTimeLink(const float new_time_link = 1);
 
-	//Helper template for the other DFS template which is the one which will be called by the other translation units 
+	//Actual DFS template which does all the work
 	template <size_t N>
 	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node, const size_t current_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool (&visited)[N]) {
 
@@ -73,6 +80,7 @@ namespace engine {
 		structures::draw(window, nodes, m);
 	}
 
+	//Helper template to call from other translation units which automatically creates all the temporary variables needed.
 	template <size_t N>
 	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node = 0, const size_t current_node = 0) {
 
@@ -84,6 +92,7 @@ namespace engine {
 		DFS(window, v, nodes, m, end_node, current_node, total_value, min_value, current_path, visited);
 	}
 
+	//Reconstructs the path from the BFS function
 	template <size_t N>
 	void reconstruct_path(std::vector<size_t> &v, int (&nodes)[N], int (&m)[N][N], const size_t current_node = 0, const size_t start_node = 0) {
 
@@ -120,26 +129,40 @@ namespace engine {
 
 			size_t current_node {queue[index++]};
 
-			structures::lightUp(nodes[current_node], orange);
-			structures::draw(window, nodes, m);
-			wait();
+			if (current_node != end_node) {
 
-			for (size_t i {}; i < N && current_node != end_node; i++) {
+				structures::lightUp(nodes[current_node], orange);
+				structures::draw(window, nodes, m);
+				wait();
 
-				if (i == start_node)
-					continue;
+				for (size_t i {}; i < N && current_node != end_node; i++) {
 
-				int sum {m[current_node][i] + node_values[current_node]};
-				if (sum < node_values[i] || !node_values[i]) {
-					node_values[i] = sum;
-					buff[buff_size++] = i;
-					structures::lightUp(nodes[i], sf::Color::Yellow);
-					structures::draw(window, nodes, m);
-					wait();
+					if (i == start_node)
+						continue;
+
+					//If there is path to a node check if it's a good option
+					if (m[current_node][i]) {
+
+						//The cost of going to node i from current_node
+						int sum {m[current_node][i] + node_values[current_node]};
+
+						//If conditions apply add node to queue
+						if (sum < node_values[i] || !node_values[i]) {
+							node_values[i] = sum;
+							buff[buff_size++] = i;
+						}
+					}
 				}
 			}
 
 			if (index == queue_size) {
+
+				//Coloring all the nodes to be checked
+				for (size_t i {}; i < buff_size; i++) {
+					structures::lightUp(nodes[buff[i]], sf::Color::Yellow);
+					structures::draw(window, nodes, m);
+					wait();
+				}
 
 				delete[] queue;
 				queue = buff;

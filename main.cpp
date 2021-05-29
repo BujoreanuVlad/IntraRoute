@@ -13,16 +13,17 @@ const sf::Color background(155, 165, 155);
 
 int m[NUM_NODES][NUM_NODES] = {
 	       {0, 10, 0, 0},
-	       {12, 0, 2, 1},
+	       {12, 0, 2, 19},
 	       {0, 3, 0, 7},
 	       {0, 8, 0, 0}
 	     };
 
 structures::Node nodes[NUM_NODES]; 
 
-void generateGraph() {
+void reset(std::vector<size_t> &path) {
 
-	structures::Edge edge1 = structures::newEdge(&nodes[0], &nodes[1], 10);
+	structures::reset(nodes);
+	path.clear();
 }
 
 int main() {
@@ -30,19 +31,19 @@ int main() {
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	window = new sf::RenderWindow(sf::VideoMode(width, height), "Intranet path finder", sf::Style::Default, settings);
+	engine::setTimeLink(2);
 
 	if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 		return 1;
 
 	std::vector<size_t> my_path;
-	generateGraph();
 
 	for (size_t i {}; i < NUM_NODES; i++) {
 		nodes[i] = structures::newNode(1, i+1);
 		structures::setPosition(nodes[i], 50 + (i/5) * 120, 50 + (i%5) * 100);
 	}
 	
-	bool once {true};
+	bool once {};
 	
 	//node that is clicked
 	//And initial coordinates of mouse
@@ -57,6 +58,10 @@ int main() {
 
 			if (event.type == sf::Event::Closed)
 				window->close();
+
+			if (event.type == sf::Event::KeyPressed)
+				if (event.key.code == sf::Keyboard::Space)
+					once = true;
 
 			if (event.type == sf::Event::MouseButtonReleased)
 				   node = nullptr;
@@ -94,7 +99,9 @@ int main() {
 
 		if (once) {
 
-			engine::DFS(*window, my_path, nodes, m, 3, 0);
+			reset(my_path);
+
+			engine::BFS(*window, my_path, nodes, m, 3, 0);
 
 			for (auto value : my_path) {
 

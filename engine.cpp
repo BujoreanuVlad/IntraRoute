@@ -1,10 +1,18 @@
 #include "engine.hpp"
 
-float engine::time_link {1};
+namespace engine {
 
-void engine::wait() {
+	float time_link {1};
 
-	float t = std::clock();
+	void setTimeLink(const float new_time_link) {
 
-	while ((std::clock() - t) / CLOCKS_PER_SEC < time_link);
+		time_link = new_time_link;
+	}
+
+	void wait() {
+
+		float t = std::clock();
+
+		while ((std::clock() - t) / CLOCKS_PER_SEC < time_link);
+	}
 }
