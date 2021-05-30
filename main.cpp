@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include <SFML/Graphics.hpp>
 #include "engine.hpp"
 #include "structures.hpp"
@@ -7,23 +8,40 @@ const float width {1000};
 const float height {800};
 const size_t NUM_NODES {4};
 
+const size_t start_node {0};
+const size_t end_node {3};
+
 sf::RenderWindow *window;
 sf::Font font;
 const sf::Color background(155, 165, 155);
+std::vector<size_t> my_path;
 
 int m[NUM_NODES][NUM_NODES] = {
 	       {0, 10, 0, 0},
-	       {12, 0, 2, 19},
+	       {12, 0, 2, 1},
 	       {0, 3, 0, 7},
 	       {0, 8, 0, 0}
 	     };
 
 structures::Node nodes[NUM_NODES]; 
 
-void reset(std::vector<size_t> &path) {
+namespace {
 
-	structures::reset(nodes);
-	path.clear();
+	void reset(std::vector<size_t> &path) {
+
+		structures::reset(nodes);
+		path.clear();
+	}
+
+	void choice(int code) {
+
+		switch (code) {
+
+			case engine::DFS_CODE: engine::DFS(*window, my_path, nodes, m, end_node, start_node); break;
+			case engine::BFS_CODE: engine::BFS(*window, my_path, nodes, m, end_node, start_node); break;
+			default: std::cout << "Error, no matching code\n"; break;
+		}
+	}
 }
 
 int main() {
@@ -36,13 +54,12 @@ int main() {
 	if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 		return 1;
 
-	std::vector<size_t> my_path;
-
 	for (size_t i {}; i < NUM_NODES; i++) {
 		nodes[i] = structures::newNode(1, i+1);
 		structures::setPosition(nodes[i], 50 + (i/5) * 120, 50 + (i%5) * 100);
 	}
 	
+	//Flag that determines wether the algorithm should be run or not
 	bool once {};
 	
 	//node that is clicked
@@ -101,7 +118,8 @@ int main() {
 
 			reset(my_path);
 
-			engine::BFS(*window, my_path, nodes, m, 3, 0);
+			//engine::BFS(*window, my_path, nodes, m, 3, 0);
+			choice(engine::BFS_CODE);
 
 			for (auto value : my_path) {
 

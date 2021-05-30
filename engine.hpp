@@ -18,10 +18,25 @@ namespace engine {
 	extern float time_link;
 	const sf::Color orange(252, 147, 0);
 	
+	//Macro codes for the algorithms declared in this file
+	const int DFS_CODE {0};
+	const int BFS_CODE {1};
+
 	//Waits for the duration of the time_link variable which is measured in real-life seconds
 	void wait();
 	//Changes the time_link variable
 	void setTimeLink(const float new_time_link = 1);
+
+	/*
+	  I really shouldn't try to use things I don't understand
+
+	//Template which takes as argument an algorithm (such as DFS or BFS) and uses it on a set of parameters
+	template <typename Function, size_t N>
+	void algorithm(Function func, sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node, const size_t start_node) {
+
+		func(window, v, nodes, m, end_node, start_node);
+	}
+	*/
 
 	//Actual DFS template which does all the work
 	template <size_t N>
