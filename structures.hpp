@@ -6,6 +6,8 @@
 
 //Getting the font from the main.cpp file
 extern sf::Font font;
+extern const float width;
+extern const float height;
 
 namespace structures {
 
@@ -16,6 +18,14 @@ namespace structures {
 		sf::RectangleShape rect;
 	};
 
+	struct Button {
+
+		float width, height;
+		int code;
+		sf::Text text;
+		sf::RectangleShape rect;
+	};
+
 	struct Edge {
 
 		   Node *from, *to;
@@ -23,8 +33,8 @@ namespace structures {
 	};
 
 	//Default width and height of the nodes' RectangleShape
-	const float width {100};
-	const float height {50};
+	const float width {::width / 10};
+	const float height {::height / 800 * 50};
 
 	//A constructor for making new Node structs.
 	//Don't ask me why I don't use a class instead
@@ -44,6 +54,14 @@ namespace structures {
 	}
 	
 	Edge newEdge(Node *from, Node *to, int cost);
+
+	//Constructor, you already know the drill
+	Button newButton(int code, const char c[]= "", float w = width, float h = height);
+	void setPosition(Button &button, float x, float y);
+	//Sets the text on a button
+	void setText(Button &button, const char text[]);
+	//Draws a button
+	void draw(sf::RenderWindow &window, Button &button);
 
 	//Helper function for drawing text
 	sf::Text makeText(const Node &node);

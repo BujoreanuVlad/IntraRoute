@@ -42,6 +42,23 @@ namespace {
 			default: std::cout << "Error, no matching code\n"; break;
 		}
 	}
+
+	void draw() {
+
+		sf::RectangleShape topBar(sf::Vector2f(width, height / 10));
+		topBar.setPosition(0, 0);
+
+		structures::Button DFS_Button = structures::newButton(engine::DFS_CODE);
+		setPosition(DFS_Button, width / 100, height / 80);
+		setText(DFS_Button, "DFS"); 
+		structures::Button BFS_Button = structures::newButton(engine::BFS_CODE);
+		setPosition(BFS_Button, 2 * width / 100 + DFS_Button.width, height / 80);
+		setText(BFS_Button, "BFS");
+
+		window->draw(topBar);
+		draw(*window, DFS_Button);
+		draw(*window, BFS_Button);
+	}
 }
 
 int main() {
@@ -49,14 +66,14 @@ int main() {
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	window = new sf::RenderWindow(sf::VideoMode(width, height), "Intranet path finder", sf::Style::Default, settings);
-	engine::setTimeLink(2);
+	engine::setTimeLink(1);
 
 	if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 		return 1;
 
 	for (size_t i {}; i < NUM_NODES; i++) {
 		nodes[i] = structures::newNode(1, i+1);
-		structures::setPosition(nodes[i], 50 + (i/5) * 120, 50 + (i%5) * 100);
+		structures::setPosition(nodes[i], 50 + (i/5) * 120, 150 + (i%5) * 100);
 	}
 	
 	//Flag that determines wether the algorithm should be run or not
@@ -112,6 +129,7 @@ int main() {
 
 		window->clear(background);
 
+		draw();
 		structures::draw(*window, nodes, m);
 
 		if (once) {
