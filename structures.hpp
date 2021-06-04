@@ -47,15 +47,9 @@ namespace structures {
 	bool isInside(const Node &node, const sf::Vector2i &position);
 	//Changes the color of the border
 	void lightUp(Node &node, const sf::Color color = sf::Color::Cyan);
-	//Resets the colors of all the nodes to Cyan
-	template <size_t N>
-	void reset(Node (&nodes)[N]) {
-
-		for (size_t i {}; i < N; i++) {
-			lightUp(nodes[i]);
-			nodes[i].order= sf::Text();
-		}
-	}
+	//Resets the colors of all the nodes to Cyan and sets the
+	//text of each node to an empty text
+	void reset(size_t N, Node nodes[]); 
 	
 	Edge newEdge(Node *from, Node *to, int cost);
 
@@ -69,38 +63,8 @@ namespace structures {
 
 	//Helper function for drawing text
 	sf::Text makeText(const Node &node);
-	//Template to draw all the nodes on a RenderWindow window
-	template <size_t N>
-	void draw(sf::RenderWindow &window, Node (&nodes)[N], int (&m)[N][N]) {
-		
-		for (size_t i {}; i < N; i++) {
-			
-			//Making the text over the rectangle for each node
-			sf::Text text = makeText(nodes[i]);
-
-			//Drawing the rectangle and over it the text we just made
-			window.draw(nodes[i].rect);
-			window.draw(text);
-			window.draw(nodes[i].order);
-		}
-
-		for (size_t i {}; i < N; i++) {
-
-			//Drawing the connections between the nodes
-			for (size_t j {}; j < N; j++) {
-
-				if (m[i][j]) {
-					
-					auto positioni = nodes[i].rect.getPosition();
-					auto positionj = nodes[j].rect.getPosition();
-					sf::Vertex line[2] {sf::Vertex(sf::Vector2f(positioni.x + nodes[i].width, positioni.y + nodes[i].height), sf::Color::Red), sf::Vertex(sf::Vector2f(positionj.x, positionj.y), sf::Color::Blue)};
-					window.draw(line, 2, sf::Lines);
-				}
-			}
-		}
-
-		window.display();
-	}
+	//Function to draw all the nodes on a RenderWindow window
+	void draw(sf::RenderWindow &window, size_t N, Node nodes[], int **m);
 }
 
 #endif

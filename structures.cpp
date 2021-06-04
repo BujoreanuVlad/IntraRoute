@@ -49,6 +49,14 @@ namespace structures {
 		node.rect.setOutlineColor(color);
 	}
 
+	void reset(size_t N, Node nodes[]) {
+
+		for (size_t i {}; i < N; i++) {
+			lightUp(nodes[i]);
+			nodes[i].order = sf::Text();
+		}
+	}
+
 	sf::Text makeText(const Node &node) {
 
 		sf::Text text;
@@ -107,4 +115,35 @@ namespace structures {
 		window.draw(button.rect);
 		window.draw(button.text);
 	}
+
+	void draw(sf::RenderWindow &window, size_t N, Node nodes[], int **m) {
+
+		for (size_t i {}; i < N; i++) {
+            
+            //Making the text over the rectangle for each node
+            sf::Text text = makeText(nodes[i]);
+
+            //Drawing the rectangle and over it the text we just made
+            window.draw(nodes[i].rect);
+            window.draw(text);
+            window.draw(nodes[i].order);
+        }
+
+        for (size_t i {}; i < N; i++) {
+
+            //Drawing the connections between the nodes
+            for (size_t j {}; j < N; j++) {
+
+                if (m[i][j]) {
+                    
+                    auto positioni = nodes[i].rect.getPosition();
+                    auto positionj = nodes[j].rect.getPosition();
+                    sf::Vertex line[2] {sf::Vertex(sf::Vector2f(positioni.x + nodes[i].width, positioni.y + nodes[i].height), sf::Color::Red), sf::Vertex(sf::Vector2f(positionj.x, positionj.y), sf::Color::Blue)};
+                    window.draw(line, 2, sf::Lines);
+                }
+            }
+        }
+
+        window.display();
+    }
 }

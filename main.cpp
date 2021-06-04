@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <cstring>
 #include <SFML/Graphics.hpp>
@@ -6,7 +7,6 @@
 
 const float width {1000};
 const float height {800};
-const size_t NUM_NODES {4};
 const size_t NUM_BUTTONS {2};
 
 const size_t start_node {0};
@@ -14,18 +14,13 @@ const size_t end_node {3};
 
 sf::RenderWindow *window;
 sf::Font font;
-const sf::Color background(155, 165, 155);
+const sf::Color background(70, 75, 70);
+structures::Button buttons[NUM_BUTTONS];
 std::vector<size_t> my_path;
 
-int m[NUM_NODES][NUM_NODES] = {
-							   {0, 10, 0, 0},
-							   {12, 0, 2, 1},
-							   {0, 3, 0, 7},
-							   {0, 8, 0, 0}
-							  };
-
-structures::Node nodes[NUM_NODES]; 
-structures::Button buttons[NUM_BUTTONS];
+size_t NUM_NODES;
+int **m;
+structures::Node *nodes;
 
 namespace {
 
@@ -39,11 +34,6 @@ namespace {
 		if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 			window->close();
 
-		for (size_t i {}; i < NUM_NODES; i++) {
-			nodes[i] = structures::newNode(1, i+1);
-			structures::setPosition(nodes[i], 50 + (i/5) * 120, 150 + (i%5) * 100);
-		}
-
 		buttons[0] = structures::newButton(engine::DFS_CODE);
 		setPosition(buttons[0], width / 100, height / 80);
 		setText(buttons[0], "DFS"); 
@@ -52,8 +42,42 @@ namespace {
 		setText(buttons[1], "BFS");
 	}
 
+	void loadPreset(const std::string &filename) {
+
+		if (NUM_NODES) {
+
+			for (size_t i {}; i < NUM_NODES; i++)
+				delete[] m[i];
+			delete[] m;
+
+			delete[] nodes;
+		}
+
+		std::ifstream in("Presets/" + filename);
+		
+		in >> NUM_NODES;
+
+		m = new int*[NUM_NODES];
+		nodes = new structures::Node[NUM_NODES];
+		
+		for (size_t i {}; i < NUM_NODES; i++) {
+
+			m[i] = new int[NUM_NODES];
+
+			for (size_t j {}; j < NUM_NODES; j++)
+				in >> m[i][j];
+		}
+
+		for (size_t i {}; i < NUM_NODES; i++) {
+			nodes[i] = structures::newNode(1, i+1);
+			structures::setPosition(nodes[i], 50 + (i/5) * 120, 150 + (i%5) * 100);
+		}
+
+		in.close();
+	}
+
 	void reset() {
-		structures::reset(nodes);
+		structures::reset(NUM_NODES, nodes);
 		my_path.clear();
 	}
 
@@ -63,17 +87,15 @@ namespace {
 
 			case engine::DFS_CODE: 
 				reset();
-				engine::DFS(*window, my_path, nodes, m, end_node, start_node);
-				for (auto value : my_path)
-					std::cout << ++value << " ";
+				engine::DFS(*window, my_path, NUM_NODES, nodes, m, end_node, start_node);
 				break;
 			case engine::BFS_CODE:
 				reset();
-				engine::BFS(*window, my_path, nodes, m, end_node, start_node);
-				for (auto value : my_path)
-					std::cout << ++value << " ";
+				engine::BFS(*window, my_path, NUM_NODES, nodes, m, end_node, start_node);
 				break;
-			default: std::cout << "Error, no matching code\n"; break;
+			/*default: 
+				#error Invalid code for the choice function in main.cpp
+				break;*/
 		}
 	}
 
@@ -104,6 +126,8 @@ namespace {
 int main() {
 
 	init();
+
+	loadPreset("Preset1.txt");
 
 	//node that is clicked
 	//And initial coordinates of mouse
@@ -153,12 +177,13 @@ int main() {
 
 				structures::setPosition(*node, position.x - mouse_x_diff, position.y - mouse_y_diff);
 			}
+
 		}
 
 		window->clear(background);
 
 		draw();
-		structures::draw(*window, nodes, m);
+		structures::draw(*window, NUM_NODES, nodes, m);
 		window->display();
 	}
 
