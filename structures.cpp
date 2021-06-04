@@ -28,6 +28,7 @@ namespace structures {
 	void setPosition(Node &node, float x, float y) {
 
 		node.rect.setPosition(x, y);
+		node.order.setPosition(x, y - node.height / 2);
 	}
 
 	bool isInside(const Node &node, const sf::Vector2i &position) {

@@ -1,10 +1,12 @@
 #if !defined ENGINE_H
 #define ENGINE_HG
 #include <vector>
+#include <cstring>
 #include "structures.hpp"
 #include <SFML/Graphics.hpp>
 #include <ctime>
-#include <iostream>
+
+extern sf::Font font;
 
 namespace engine {
 
@@ -26,6 +28,8 @@ namespace engine {
 	void wait();
 	//Changes the time_link variable
 	void setTimeLink(const float new_time_link = 1);
+	//Shows the path graphically
+	void showPath(sf::RenderWindow &window, structures::Node nodes[], const std::vector<size_t> &path);
 
 	/*
 	  I really shouldn't try to use things I don't understand
@@ -105,6 +109,8 @@ namespace engine {
 		bool visited[N] {};
 		
 		DFS(window, v, nodes, m, end_node, current_node, total_value, min_value, current_path, visited);
+		structures::reset(nodes);
+		showPath(window, nodes, v);
 	}
 
 	//Reconstructs the path from the BFS function
@@ -197,6 +203,8 @@ namespace engine {
 		delete[] buff;
 
 		reconstruct_path(v, node_values, m, end_node, start_node);
+		structures::reset(nodes);
+		showPath(window, nodes, v);
 	}
 }
 #endif

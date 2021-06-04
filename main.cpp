@@ -34,7 +34,7 @@ namespace {
 		sf::ContextSettings settings;
 		settings.antialiasingLevel = 8;
 		window = new sf::RenderWindow(sf::VideoMode(width, height), "Intranet path finder", sf::Style::Default, settings);
-		engine::setTimeLink(1);
+		engine::setTimeLink(0);
 
 		if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 			window->close();
@@ -105,9 +105,6 @@ int main() {
 
 	init();
 
-	//Flag that determines wether the algorithm should be run or not
-	bool run {};
-	
 	//node that is clicked
 	//And initial coordinates of mouse
 	structures::Node *node {nullptr};
@@ -121,10 +118,6 @@ int main() {
 
 			if (event.type == sf::Event::Closed)
 				window->close();
-
-			if (event.type == sf::Event::KeyPressed)
-				if (event.key.code == sf::Keyboard::Space)
-					run = true;
 
 			if (event.type == sf::Event::MouseButtonPressed) {
 			
@@ -166,17 +159,6 @@ int main() {
 
 		draw();
 		structures::draw(*window, nodes, m);
-/*
-		if (run) {
-
-			reset(my_path);
-
-			choice(engine::BFS_CODE);
-
-
-			run = false;
-		}
-*/
 		window->display();
 	}
 

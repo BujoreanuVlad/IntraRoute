@@ -16,6 +16,8 @@ namespace structures {
 		float width, height;
 		size_t group, index;
 		sf::RectangleShape rect;
+		//Text that shows order of the path taken
+		sf::Text order;
 	};
 
 	struct Button {
@@ -49,8 +51,10 @@ namespace structures {
 	template <size_t N>
 	void reset(Node (&nodes)[N]) {
 
-		for (size_t i {}; i < N; i++)
+		for (size_t i {}; i < N; i++) {
 			lightUp(nodes[i]);
+			nodes[i].order= sf::Text();
+		}
 	}
 	
 	Edge newEdge(Node *from, Node *to, int cost);
@@ -77,6 +81,7 @@ namespace structures {
 			//Drawing the rectangle and over it the text we just made
 			window.draw(nodes[i].rect);
 			window.draw(text);
+			window.draw(nodes[i].order);
 		}
 
 		for (size_t i {}; i < N; i++) {
