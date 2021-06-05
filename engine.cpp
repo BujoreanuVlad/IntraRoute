@@ -86,11 +86,12 @@ namespace engine {
         structures::draw(window, N, nodes, m);
     }
 
-	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t current_node) {
+	void DFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t current_node) {
 
         int total_value {0};
         unsigned int min_value {static_cast<unsigned>(~0)};
         std::vector<size_t> current_path;
+		std::vector<size_t> v;
         bool visited[N] {};
 
         DFS(window, v, N, nodes, m, end_node, current_node, total_value, min_value, current_path, visited);
@@ -118,9 +119,10 @@ namespace engine {
         }
     }
 
-	void BFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t start_node) {
+	void BFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t start_node) {
 
 		int node_values[N] {};
+		std::vector<size_t> v;
         size_t *buff, *queue;
         size_t buff_size {}, queue_size {1};
         size_t index {};

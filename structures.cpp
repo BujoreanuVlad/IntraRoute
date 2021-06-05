@@ -1,5 +1,7 @@
 #include "structures.hpp"
 
+extern const sf::Color background;
+
 namespace {
 
 	sf::Color node_bg(35, 40, 35);
@@ -90,8 +92,8 @@ namespace structures {
 		button.height = height;
 		button.code = code;
 		button.rect = sf::RectangleShape(sf::Vector2f(width, height));
-		button.rect.setFillColor(Grey);
-		button.text = sf::Text(c, font);
+		button.rect.setFillColor(background);
+		setText(button, c);
 
 		return button;
 	}
@@ -99,14 +101,26 @@ namespace structures {
 	void setPosition(Button &button, float x, float y) {
 
 		button.rect.setPosition(x, y);
-		button.text.setPosition(x + button.width / 5, y + button.height / 5);
+		button.text.setPosition(x + button.width / 7, y);
 	}
 
-	void setText(Button &button, const char text[]) {
+	void setText(Button &button, std::string text) {
+
+		size_t words {1};
+		unsigned int max_word_length {};
+
+		for (size_t i {text.find_first_of(" ")}; i < text.length();) {
+
+			text.replace(i, 1, "\n");
+			words++;
+			i = text.find_first_of(" ", i);
+		}
 
 		sf::Text buttonText(text, font);
+		//buttonText.setCharacterSize((30*4) / text.length());
+		buttonText.setCharacterSize(40 / words);
 		auto currentPosition = button.rect.getPosition();
-		buttonText.setPosition(currentPosition.x + button.width / 5, currentPosition.y + button.height / 5);
+		buttonText.setPosition(currentPosition.x - button.width / 5, currentPosition.y - button.height / 5);
 		button.text = buttonText;
 	}
 

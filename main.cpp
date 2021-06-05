@@ -7,16 +7,18 @@
 
 const float width {1000};
 const float height {800};
-const size_t NUM_BUTTONS {2};
+const size_t NUM_BUTTONS {4};
 
 const size_t start_node {0};
 const size_t end_node {3};
 
+const int ADD_NODE_CODE {-1};
+const int LOAD_PRESET_CODE {-2};
+
 sf::RenderWindow *window;
 sf::Font font;
-const sf::Color background(70, 75, 70);
+extern const sf::Color background(70, 75, 70);
 structures::Button buttons[NUM_BUTTONS];
-std::vector<size_t> my_path;
 
 size_t NUM_NODES;
 int **m;
@@ -34,13 +36,19 @@ namespace {
 		if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 			window->close();
 
-		buttons[0] = structures::newButton(engine::DFS_CODE);
+		buttons[0] = structures::newButton(engine::DFS_CODE, "DFS");
 		setPosition(buttons[0], width / 100, height / 80);
-		setText(buttons[0], "DFS"); 
-		buttons[1] = structures::newButton(engine::BFS_CODE);
-		setPosition(buttons[1], 2 * width / 100 + buttons[0].width, height / 80);
-		setText(buttons[1], "BFS");
-	}
+
+		buttons[1] = structures::newButton(engine::BFS_CODE, "BFS");
+		//setPosition(buttons[1], 2 * width / 100 + buttons[0].width, height / 80);
+
+		buttons[2] = structures::newButton(ADD_NODE_CODE, "Add node");
+
+		buttons[3] = structures::newButton(LOAD_PRESET_CODE, "Load preset");
+
+		for (size_t i {1}; i < NUM_BUTTONS; i++)
+			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
+	}	
 
 	void loadPreset(const std::string &filename) {
 
@@ -51,9 +59,15 @@ namespace {
 			delete[] m;
 
 			delete[] nodes;
+
+			NUM_NODES = 0;
 		}
 
-		std::ifstream in("Presets/" + filename);
+		std::ifstream in("Presets/" + filename + ".txt");
+		if (!in) {
+			in.close();
+			return;
+		}
 		
 		in >> NUM_NODES;
 
@@ -76,9 +90,45 @@ namespace {
 		in.close();
 	}
 
-	void reset() {
-		structures::reset(NUM_NODES, nodes);
-		my_path.clear();
+	std::string prompt() {
+
+		sf::RenderWindow promptWindow(sf::VideoMode(300, 100), "Prompt");
+		std::string promptText {};
+		sf::Text enteredText("", font);
+		enteredText.setFillColor(sf::Color::Black);
+
+		while (promptWindow.isOpen()) {
+
+			sf::Event event;
+
+			while (promptWindow.pollEvent(event)) {
+
+				if (event.type == sf::Event::Closed)
+					promptWindow.close();
+
+				if (event.type == sf::Event::TextEntered) {
+
+					if (event.text.unicode == static_cast<char>(13)) {
+						promptWindow.close();
+						return promptText;
+					}
+
+					if (event.text.unicode == '\b')
+						promptText.erase(promptText.length() - 1, 1);
+					else
+						promptText += event.text.unicode;
+					enteredText.setString(promptText.c_str());
+				}
+			}
+
+			promptWindow.clear(sf::Color::White);
+
+			promptWindow.draw(enteredText);
+
+			promptWindow.display();
+		}
+
+		return promptText;
 	}
 
 	void choice(int code) {
@@ -86,16 +136,18 @@ namespace {
 		switch (code) {
 
 			case engine::DFS_CODE: 
-				reset();
-				engine::DFS(*window, my_path, NUM_NODES, nodes, m, end_node, start_node);
+				structures::reset(NUM_NODES, nodes);
+				engine::DFS(*window, NUM_NODES, nodes, m, end_node, start_node);
 				break;
 			case engine::BFS_CODE:
-				reset();
-				engine::BFS(*window, my_path, NUM_NODES, nodes, m, end_node, start_node);
+				structures::reset(NUM_NODES, nodes);
+				engine::BFS(*window, NUM_NODES, nodes, m, end_node, start_node);
 				break;
-			/*default: 
-				#error Invalid code for the choice function in main.cpp
-				break;*/
+
+			case LOAD_PRESET_CODE:
+				std::string filename = prompt();
+				loadPreset(filename);
+				break;
 		}
 	}
 
@@ -127,7 +179,7 @@ int main() {
 
 	init();
 
-	loadPreset("Preset1.txt");
+	loadPreset("Preset1");
 
 	//node that is clicked
 	//And initial coordinates of mouse

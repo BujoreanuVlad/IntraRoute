@@ -54,10 +54,10 @@ namespace structures {
 	Edge newEdge(Node *from, Node *to, int cost);
 
 	//Constructor, you already know the drill
-	Button newButton(int code, const char c[]= "", float w = width, float h = height);
+	Button newButton(int code, const char c[] = "", float w = width, float h = height);
 	void setPosition(Button &button, float x, float y);
 	//Sets the text on a button
-	void setText(Button &button, const char text[]);
+	void setText(Button &button, std::string text);
 	//Draws a button
 	void draw(sf::RenderWindow &window, Button &button);
 
