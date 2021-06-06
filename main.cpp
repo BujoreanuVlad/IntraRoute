@@ -53,6 +53,19 @@ namespace {
 			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
 	}	
 
+	//Draws static things for the window
+	void draw() {
+
+		window->clear(background);
+
+		sf::RectangleShape topBar(sf::Vector2f(width, height / 10));
+		topBar.setPosition(0, 0);
+
+		window->draw(topBar);
+		for (size_t i {}; i < NUM_BUTTONS; i++)
+			structures::draw(*window, buttons[i]);
+	}
+
 	//Loads a preset from the Presets/ folder
 	void loadPreset(const std::string &filename) {
 
@@ -164,11 +177,15 @@ namespace {
 
 			case engine::DFS_CODE: 
 				structures::reset(NUM_NODES, nodes);
+				draw();
+				structures::draw(*window, NUM_NODES, nodes, m);
 				engine::DFS(*window, NUM_NODES, nodes, m, end_node, start_node);
 				break;
 
 			case engine::BFS_CODE:
 				structures::reset(NUM_NODES, nodes);
+				draw();
+				structures::draw(*window, NUM_NODES, nodes, m);
 				engine::BFS(*window, NUM_NODES, nodes, m, end_node, start_node);
 				break;
 
@@ -231,17 +248,6 @@ namespace {
 					break;
 				}
 		}
-	}
-
-	//Draws static things for the window
-	void draw() {
-
-		sf::RectangleShape topBar(sf::Vector2f(width, height / 10));
-		topBar.setPosition(0, 0);
-
-		window->draw(topBar);
-		for (size_t i {}; i < NUM_BUTTONS; i++)
-			draw(*window, buttons[i]);
 	}
 
 	//Checks which button was clicked and performs its action
@@ -318,7 +324,6 @@ int main() {
 
 		}
 
-		window->clear(background);
 
 		draw();
 		structures::draw(*window, NUM_NODES, nodes, m);

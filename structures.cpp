@@ -56,7 +56,7 @@ namespace structures {
 
 		for (size_t i {}; i < N; i++) {
 			lightUp(nodes[i]);
-			nodes[i].order = sf::Text();
+			nodes[i].order = sf::Text("", font);
 		}
 	}
 
