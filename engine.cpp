@@ -78,9 +78,9 @@ namespace engine {
                 total_value -= m[current_node][i];
             }
 
-            visited[current_node] = false;
         }
 
+        visited[current_node] = false;
         structures::lightUp(nodes[current_node]);
         current_path.pop_back();
         structures::draw(window, N, nodes, m);
@@ -92,7 +92,7 @@ namespace engine {
         unsigned int min_value {static_cast<unsigned>(~0)};
         std::vector<size_t> current_path;
 		std::vector<size_t> v;
-        bool visited[N] {};
+        bool *visited = new bool[N] {};
 
         DFS(window, v, N, nodes, m, end_node, current_node, total_value, min_value, current_path, visited);
         structures::reset(N, nodes);

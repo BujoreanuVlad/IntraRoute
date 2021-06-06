@@ -8,19 +8,22 @@
 //Constants for the window
 const float width {1000};
 const float height {800};
-const size_t NUM_BUTTONS {4};
+const size_t NUM_BUTTONS {6};
 
 const size_t start_node {0};
 const size_t end_node {3};
 
 //Button codes
 const int ADD_NODE_CODE {-1};
-const int LOAD_PRESET_CODE {-2};
+const int REMOVE_NODE_CODE {-2};
+const int LOAD_PRESET_CODE {-3};
+const int SAVE_PRESET_CODE {-4};
 
 sf::RenderWindow *window;
 sf::Font font;
 extern const sf::Color background(70, 75, 70);
 structures::Button buttons[NUM_BUTTONS];
+std::string currentFile {""};
 
 size_t NUM_NODES;
 int **m;
@@ -47,7 +50,11 @@ namespace {
 
 		buttons[2] = structures::newButton(ADD_NODE_CODE, "Add node");
 
-		buttons[3] = structures::newButton(LOAD_PRESET_CODE, "Load preset");
+		buttons[3] = structures::newButton(REMOVE_NODE_CODE, "Remove node");
+
+		buttons[4] = structures::newButton(LOAD_PRESET_CODE, "Load preset");
+
+		buttons[5] = structures::newButton(SAVE_PRESET_CODE, "Save preset");
 
 		for (size_t i {1}; i < NUM_BUTTONS; i++)
 			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
@@ -87,9 +94,12 @@ namespace {
 
 		if (!in) {
 			in.close();
+			currentFile = "";
 			return;
 		}
 		
+		currentFile = filename;
+
 		in >> NUM_NODES;
 
 		m = new int*[NUM_NODES];
@@ -193,6 +203,33 @@ namespace {
 				{
 					std::string filename = prompt();
 					loadPreset(filename);
+					break;
+				}
+
+			case SAVE_PRESET_CODE:
+				{
+					std::string filename = prompt();
+					if (filename == "")
+						filename = currentFile;
+
+					std::ofstream out("Presets/" + filename + ".txt");
+
+					out << NUM_NODES << "\n\n";
+					
+					for (size_t i {}; i < NUM_NODES; i++) {
+						for (size_t j {}; j < NUM_NODES; j++)
+							out << m[i][j] << " ";
+						out << "\n";
+					}
+
+					out << "\n";
+
+					for (size_t i {}; i < NUM_NODES; i++) {
+						auto position {nodes[i].rect.getPosition()};
+						out << nodes[i].group << " " << nodes[i].index << " " << position.x << " " << position.y << "\n";
+					}
+
+					out.close();
 					break;
 				}
 
