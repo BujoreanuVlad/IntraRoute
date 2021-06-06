@@ -83,8 +83,15 @@ namespace {
 		}
 
 		for (size_t i {}; i < NUM_NODES; i++) {
-			nodes[i] = structures::newNode(1, i+1);
-			structures::setPosition(nodes[i], 50 + (i/5) * 120, 150 + (i%5) * 100);
+
+			int group, index;
+			float posX, posY;
+			
+			in >> group >> index;
+			in >> posX >> posY;
+
+			nodes[i] = structures::newNode(group, index);
+			structures::setPosition(nodes[i], posX, posY);
 		}
 
 		in.close();
@@ -139,15 +146,54 @@ namespace {
 				structures::reset(NUM_NODES, nodes);
 				engine::DFS(*window, NUM_NODES, nodes, m, end_node, start_node);
 				break;
+
 			case engine::BFS_CODE:
 				structures::reset(NUM_NODES, nodes);
 				engine::BFS(*window, NUM_NODES, nodes, m, end_node, start_node);
 				break;
 
 			case LOAD_PRESET_CODE:
-				std::string filename = prompt();
-				loadPreset(filename);
-				break;
+				{
+					std::string filename = prompt();
+					loadPreset(filename);
+					break;
+				}
+
+			case ADD_NODE_CODE:
+				{
+					std::string node_group = prompt();
+					std::string node_index = prompt();
+
+					if (node_group.find_first_not_of("0123456789") != std::string::npos)
+						break;
+					if (node_index.find_first_not_of("0123456789") != std::string::npos)
+						break;
+
+					NUM_NODES++;
+					structures::Node *buff = new structures::Node[NUM_NODES];
+					int **m_buff = new int*[NUM_NODES];
+
+					for (size_t i {}; i < NUM_NODES - 1; i++) {
+
+						buff[i] = nodes[i];
+						m_buff[i] = new int[NUM_NODES];
+
+						for (size_t j {}; j < NUM_NODES - 1; j++)
+							m_buff[i][j] = m[i][j];
+
+						m_buff[i][NUM_NODES-1] = 0;
+						delete[] m[i];
+					}
+
+					m_buff[NUM_NODES-1] = new int[NUM_NODES] {};
+					delete[] m;
+					m = m_buff;
+
+					buff[NUM_NODES-1] = structures::newNode(std::stoi(node_group), std::stoi(node_index));
+					delete[] nodes;
+					nodes = buff;
+					break;
+				}
 		}
 	}
 

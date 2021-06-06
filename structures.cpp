@@ -22,6 +22,7 @@ namespace structures {
 		rect.setOutlineColor(sf::Color::Cyan);
 		rect.setOutlineThickness(2);
 		rect.setFillColor(node_bg);
+		rect.setPosition(sf::Vector2f(0, ::height/9));
 		node.rect = rect;
 
 		return node;
