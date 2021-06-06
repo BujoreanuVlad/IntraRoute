@@ -1,0 +1,11 @@
+N
+
+val11 val12 ... val1N
+val21 val22 ... val2N
+.....................
+valN1 valN2 ... valNN
+
+group1 index1 posX1 posY1
+group2 index2 posX2 posY2
+.........................
+groupN indexN posXN posYN

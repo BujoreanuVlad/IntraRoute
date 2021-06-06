@@ -5,6 +5,7 @@
 #include "engine.hpp"
 #include "structures.hpp"
 
+//Constants for the window
 const float width {1000};
 const float height {800};
 const size_t NUM_BUTTONS {4};
@@ -12,6 +13,7 @@ const size_t NUM_BUTTONS {4};
 const size_t start_node {0};
 const size_t end_node {3};
 
+//Button codes
 const int ADD_NODE_CODE {-1};
 const int LOAD_PRESET_CODE {-2};
 
@@ -26,6 +28,7 @@ structures::Node *nodes;
 
 namespace {
 
+	//Initializes main window and all of its assets
 	void init() {
 
 		sf::ContextSettings settings;
@@ -50,6 +53,7 @@ namespace {
 			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
 	}	
 
+	//Loads a preset from the Presets/ folder
 	void loadPreset(const std::string &filename) {
 
 		if (NUM_NODES) {
@@ -58,12 +62,16 @@ namespace {
 				delete[] m[i];
 			delete[] m;
 
+			m = nullptr;
+
 			delete[] nodes;
+			nodes = nullptr;
 
 			NUM_NODES = 0;
 		}
 
 		std::ifstream in("Presets/" + filename + ".txt");
+
 		if (!in) {
 			in.close();
 			return;
@@ -97,6 +105,17 @@ namespace {
 		in.close();
 	}
 
+	//Checks if a certain node address already exists
+	bool checkIfValid(size_t group, size_t index) {
+
+		for (size_t i {}; i < NUM_NODES; i++)
+			if (nodes[i].group == group && nodes[i].index == index)
+				return false;
+
+		return true;
+	}
+
+	//Shows a prompt which asks for input and returns it when the user presses the enter key
 	std::string prompt() {
 
 		sf::RenderWindow promptWindow(sf::VideoMode(300, 100), "Prompt");
@@ -135,9 +154,10 @@ namespace {
 			promptWindow.display();
 		}
 
-		return promptText;
+		return "";
 	}
 
+	//Chooses which action to perform based on the code of the button pressed
 	void choice(int code) {
 
 		switch (code) {
@@ -169,6 +189,12 @@ namespace {
 					if (node_index.find_first_not_of("0123456789") != std::string::npos)
 						break;
 
+					size_t group {static_cast<size_t> (std::stoi(node_group))};
+					size_t index {static_cast<size_t> (std::stoi(node_index))};
+
+					if (!checkIfValid(group, index))
+						break;
+
 					NUM_NODES++;
 					structures::Node *buff = new structures::Node[NUM_NODES];
 					int **m_buff = new int*[NUM_NODES];
@@ -182,21 +208,32 @@ namespace {
 							m_buff[i][j] = m[i][j];
 
 						m_buff[i][NUM_NODES-1] = 0;
-						delete[] m[i];
+
+						if (m[i] != nullptr) {
+							delete[] m[i];
+							m[i] = nullptr;
+						}
 					}
 
 					m_buff[NUM_NODES-1] = new int[NUM_NODES] {};
-					delete[] m;
+					if (m != nullptr) {
+						delete[] m;
+						m = nullptr;
+					}
 					m = m_buff;
 
-					buff[NUM_NODES-1] = structures::newNode(std::stoi(node_group), std::stoi(node_index));
-					delete[] nodes;
+					buff[NUM_NODES-1] = structures::newNode(group, index);
+					if (nodes != nullptr) {
+						delete[] nodes;
+						nodes = nullptr;
+					}
 					nodes = buff;
 					break;
 				}
 		}
 	}
 
+	//Draws static things for the window
 	void draw() {
 
 		sf::RectangleShape topBar(sf::Vector2f(width, height / 10));
@@ -207,6 +244,7 @@ namespace {
 			draw(*window, buttons[i]);
 	}
 
+	//Checks which button was clicked and performs its action
 	void isButtonClicked(float x, float y) {
 
 		for (size_t i {}; i < NUM_BUTTONS; i++) {
@@ -216,6 +254,7 @@ namespace {
 				(y >= position.y && y <= position.y + buttons[i].height)) {
 
 				choice(buttons[i].code);
+				return;
 			}
 		}
 	}
@@ -226,6 +265,7 @@ int main() {
 	init();
 
 	loadPreset("Preset1");
+	engine::setTimeLink(0.5);
 
 	//node that is clicked
 	//And initial coordinates of mouse
