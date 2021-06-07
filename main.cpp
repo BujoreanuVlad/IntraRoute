@@ -8,7 +8,7 @@
 //Constants for the window
 const float width {1000};
 const float height {800};
-const size_t NUM_BUTTONS {6};
+const size_t NUM_BUTTONS {7};
 
 const size_t start_node {0};
 const size_t end_node {3};
@@ -18,6 +18,7 @@ const int ADD_NODE_CODE {-1};
 const int REMOVE_NODE_CODE {-2};
 const int LOAD_PRESET_CODE {-3};
 const int SAVE_PRESET_CODE {-4};
+const int SET_TIME_LINK_CODE {-5};
 
 sf::RenderWindow *window;
 sf::Font font;
@@ -30,6 +31,9 @@ int **m;
 structures::Node *nodes;
 
 namespace {
+	
+	//bool value which tracks if the next node clicked should be removed or not
+	bool removeNode {};
 
 	//Initializes main window and all of its assets
 	void init() {
@@ -55,6 +59,8 @@ namespace {
 		buttons[4] = structures::newButton(LOAD_PRESET_CODE, "Load preset");
 
 		buttons[5] = structures::newButton(SAVE_PRESET_CODE, "Save preset");
+
+		buttons[6] = structures::newButton(SET_TIME_LINK_CODE, "Set time link");
 
 		for (size_t i {1}; i < NUM_BUTTONS; i++)
 			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
@@ -284,6 +290,22 @@ namespace {
 					nodes = buff;
 					break;
 				}
+
+			case REMOVE_NODE_CODE:
+				removeNode = !removeNode;
+				if (removeNode)
+					buttons[3].text.setFillColor(sf::Color::Red);
+				else
+					buttons[3].text.setFillColor(sf::Color::White);
+				break;
+
+			case SET_TIME_LINK_CODE:
+				{
+					std::string newTimeLink = prompt();
+					if (newTimeLink.find_first_not_of("0123456789.") == std::string::npos)
+						engine::setTimeLink(std::stof(newTimeLink));
+					break;
+				}
 		}
 	}
 
@@ -308,7 +330,7 @@ int main() {
 	init();
 
 	loadPreset("Preset1");
-	engine::setTimeLink(0.5);
+	engine::setTimeLink(0.75);
 
 	//node that is clicked
 	//And initial coordinates of mouse
@@ -334,6 +356,7 @@ int main() {
 				   node = nullptr;
 
 			if (node == nullptr && event.type == sf::Event::MouseButtonPressed) {
+
 				if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 
 				   sf::Vector2i position {sf::Mouse::getPosition(*window)};
@@ -342,11 +365,39 @@ int main() {
 
 						if (structures::isInside(nodes[i], position)) {
 
-						 	node = &(nodes[i]);
-							auto node_position {node->rect.getPosition()};
-							mouse_x_diff = position.x - node_position.x;
-							mouse_y_diff = position.y - node_position.y;
-							break;
+							if (removeNode) {
+
+								structures::Node *buff = new structures::Node[NUM_NODES--];
+								int **m_buff = new int*[NUM_NODES];
+								for (size_t j {}; j <= NUM_NODES; j++) {
+									
+									if (j == i) {
+										delete[] m[j];
+										continue;
+									}
+
+									buff[j - static_cast<size_t>(j > i)] = nodes[j];
+									m_buff[j - static_cast<size_t>(j > i)] = new int[NUM_NODES];
+
+									for (size_t k {}; k <= NUM_NODES; k++)
+										m_buff[j - static_cast<size_t>(j > i)][k - static_cast<size_t>(k > i)] = m[j][k];
+
+									delete[] m[j];
+								}
+
+								delete[] nodes;
+								delete[] m;
+
+								nodes = buff;
+								m = m_buff;
+							}
+							else {
+								node = &(nodes[i]);
+								auto node_position {node->rect.getPosition()};
+								mouse_x_diff = position.x - node_position.x;
+								mouse_y_diff = position.y - node_position.y;
+								break;
+							}
 						 }
 				   }
 				}
