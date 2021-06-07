@@ -332,10 +332,13 @@ int main() {
 	loadPreset("Preset1");
 	engine::setTimeLink(0.75);
 
-	//node that is clicked
+	//node that is being dragged around the screen
 	//And initial coordinates of mouse
 	structures::Node *node {nullptr};
 	float mouse_x_diff, mouse_y_diff;
+
+	//Indices of From and To nodes for creating/deleting connections
+	size_t from {}, to {};
 
 	while (window->isOpen()) {
 
@@ -346,17 +349,21 @@ int main() {
 			if (event.type == sf::Event::Closed)
 				window->close();
 
+			//Checks if a button was pressed
 			if (event.type == sf::Event::MouseButtonPressed) {
 			
 				auto position {sf::Mouse::getPosition(*window)};
 				isButtonClicked(position.x, position.y);
 			}
-
+	
+			//Releases the node
 			if (event.type == sf::Event::MouseButtonReleased)
 				   node = nullptr;
 
+			//Checks if a node was clicked and what to do with it
 			if (node == nullptr && event.type == sf::Event::MouseButtonPressed) {
 
+				//Either drags node around the screen or deletes it depending if the removeNode flag is set
 				if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 
 				   sf::Vector2i position {sf::Mouse::getPosition(*window)};
@@ -396,10 +403,48 @@ int main() {
 								auto node_position {node->rect.getPosition()};
 								mouse_x_diff = position.x - node_position.x;
 								mouse_y_diff = position.y - node_position.y;
-								break;
 							}
+
+							break;
 						 }
 				   }
+				}
+
+				//Creates link between nodes or deletes it if it already exists
+				else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+		
+					auto position {sf::Mouse::getPosition(*window)};
+
+					for (size_t i {}; i < NUM_NODES; i++) {
+
+						if (structures::isInside(nodes[i], position)) {
+
+							if (!from) {
+								from = i+1;
+								structures::lightUp(nodes[i], sf::Color::Magenta);
+							}
+							else {
+								to = i+1;
+								if (from != to) {
+									//If connection already exists delete it
+									if (m[from-1][to-1])
+										m[from-1][to-1] = 0;
+									//Otherwise create it
+									else {
+										std::string value {prompt()};
+										if (value.find_first_not_of("0123456789") == std::string::npos && value != "")
+											m[from-1][to-1] = std::stoi(value);
+									}
+								}
+
+								structures::lightUp(nodes[from-1]);
+								from = 0;
+								to = 0;
+							}
+
+							break;
+						}
+					}
 				}
 			}
 
