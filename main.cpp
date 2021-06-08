@@ -143,15 +143,15 @@ namespace {
 
 	int getAlgorithm() {
 
-		sf::RenderWindow algorithmWindow(sf::VideoMode(600, 800), "Select algorithm");
+		sf::RenderWindow algorithmWindow(sf::VideoMode(300, 600), "Select algorithm");
 		structures::Button algorithms[2];
 		int code {};
 
 		algorithms[0] = structures::newButton(engine::DFS_CODE, "DFS");
-		structures::setPosition(algorithms[0], 100, 200);
+		structures::setPosition(algorithms[0], 100, 100);
 
 		algorithms[1] = structures::newButton(engine::BFS_CODE, "BFS");
-		structures::setPosition(algorithms[1], 100, 400);
+		structures::setPosition(algorithms[1], 100, 200);
 
 		while (algorithmWindow.isOpen()) {
 		
