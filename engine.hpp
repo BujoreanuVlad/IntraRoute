@@ -21,8 +21,8 @@ namespace engine {
 	const sf::Color orange(252, 147, 0);
 	
 	//Macro codes for the algorithms declared in this file
-	const int DFS_CODE {0};
-	const int BFS_CODE {1};
+	const int DFS_CODE {1};
+	const int BFS_CODE {2};
 
 	//Waits for the duration of the time_link variable which is measured in real-life seconds
 	void wait();

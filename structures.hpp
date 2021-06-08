@@ -16,6 +16,8 @@ namespace structures {
 		float width, height;
 		size_t group, index;
 		sf::RectangleShape rect;
+		//The ip (intranet protocol) address of the code (in the format x.x)
+		sf::Text address;
 		//Text that shows order of the path taken
 		sf::Text order;
 	};

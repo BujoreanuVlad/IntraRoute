@@ -24,6 +24,7 @@ namespace structures {
 		rect.setFillColor(node_bg);
 		rect.setPosition(sf::Vector2f(0, ::height/9));
 		node.rect = rect;
+		node.address = makeText(node);
 
 		return node;
 	}

@@ -1,24 +1,22 @@
 #include <fstream>
-#include <iostream>
 #include <cstring>
 #include <SFML/Graphics.hpp>
 #include "engine.hpp"
 #include "structures.hpp"
+#include "graphicsEngine.hpp"
 
 //Constants for the window
 const float width {1000};
 const float height {800};
-const size_t NUM_BUTTONS {7};
-
-const size_t start_node {0};
-const size_t end_node {3};
+const size_t NUM_BUTTONS {6};
 
 //Button codes
-const int ADD_NODE_CODE {-1};
-const int REMOVE_NODE_CODE {-2};
-const int LOAD_PRESET_CODE {-3};
-const int SAVE_PRESET_CODE {-4};
-const int SET_TIME_LINK_CODE {-5};
+const int FIND_PATH_CODE {-1};
+const int ADD_NODE_CODE {-2};
+const int REMOVE_NODE_CODE {-3};
+const int LOAD_PRESET_CODE {-4};
+const int SAVE_PRESET_CODE {-5};
+const int SET_TIME_LINK_CODE {-6};
 
 sf::RenderWindow *window;
 sf::Font font;
@@ -26,9 +24,11 @@ extern const sf::Color background(70, 75, 70);
 structures::Button buttons[NUM_BUTTONS];
 std::string currentFile {""};
 
-size_t NUM_NODES;
+size_t NUM_NODES {};
 int **m;
 structures::Node *nodes;
+
+namespace ge = graphicsEngine;
 
 namespace {
 	
@@ -41,26 +41,23 @@ namespace {
 		sf::ContextSettings settings;
 		settings.antialiasingLevel = 8;
 		window = new sf::RenderWindow(sf::VideoMode(width, height), "Intranet path finder", sf::Style::Default, settings);
-		engine::setTimeLink(0);
+		engine::setTimeLink(1);
 
 		if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 			window->close();
 
-		buttons[0] = structures::newButton(engine::DFS_CODE, "DFS");
+		buttons[0] = structures::newButton(FIND_PATH_CODE, "Find path");
 		setPosition(buttons[0], width / 100, height / 80);
 
-		buttons[1] = structures::newButton(engine::BFS_CODE, "BFS");
-		//setPosition(buttons[1], 2 * width / 100 + buttons[0].width, height / 80);
+		buttons[1] = structures::newButton(ADD_NODE_CODE, "Add node");
 
-		buttons[2] = structures::newButton(ADD_NODE_CODE, "Add node");
+		buttons[2] = structures::newButton(REMOVE_NODE_CODE, "Remove node");
 
-		buttons[3] = structures::newButton(REMOVE_NODE_CODE, "Remove node");
+		buttons[3] = structures::newButton(LOAD_PRESET_CODE, "Load preset");
 
-		buttons[4] = structures::newButton(LOAD_PRESET_CODE, "Load preset");
+		buttons[4] = structures::newButton(SAVE_PRESET_CODE, "Save preset");
 
-		buttons[5] = structures::newButton(SAVE_PRESET_CODE, "Save preset");
-
-		buttons[6] = structures::newButton(SET_TIME_LINK_CODE, "Set time link");
+		buttons[5] = structures::newButton(SET_TIME_LINK_CODE, "Set time link");
 
 		for (size_t i {1}; i < NUM_BUTTONS; i++)
 			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
@@ -144,46 +141,50 @@ namespace {
 		return true;
 	}
 
-	//Shows a prompt which asks for input and returns it when the user presses the enter key
-	std::string prompt() {
+	int getAlgorithm() {
 
-		sf::RenderWindow promptWindow(sf::VideoMode(300, 100), "Prompt");
-		std::string promptText {};
-		sf::Text enteredText("", font);
-		enteredText.setFillColor(sf::Color::Black);
+		sf::RenderWindow algorithmWindow(sf::VideoMode(600, 800), "Select algorithm");
+		structures::Button algorithms[2];
+		int code {};
 
-		while (promptWindow.isOpen()) {
+		algorithms[0] = structures::newButton(engine::DFS_CODE, "DFS");
+		structures::setPosition(algorithms[0], 100, 200);
 
+		algorithms[1] = structures::newButton(engine::BFS_CODE, "BFS");
+		structures::setPosition(algorithms[1], 100, 400);
+
+		while (algorithmWindow.isOpen()) {
+		
 			sf::Event event;
 
-			while (promptWindow.pollEvent(event)) {
+			while (algorithmWindow.pollEvent(event)) {
 
 				if (event.type == sf::Event::Closed)
-					promptWindow.close();
+					algorithmWindow.close();
 
-				if (event.type == sf::Event::TextEntered) {
+				if (event.type == sf::Event::MouseButtonPressed) {
 
-					if (event.text.unicode == static_cast<char>(13)) {
-						promptWindow.close();
-						return promptText;
+					auto position {sf::Mouse::getPosition(algorithmWindow)};
+
+					for (size_t i {}; i < 2; i++) {
+						auto buttonPosition = algorithms[i].rect.getPosition();
+						if ((position.x >= buttonPosition.x && position.x <= buttonPosition.x + buttons[i].width) &&
+							(position.y >= buttonPosition.y && position.y <= buttonPosition.y + buttons[i].height)) {
+							return algorithms[i].code;
+						}
 					}
-
-					if (event.text.unicode == '\b')
-						promptText.erase(promptText.length() - 1, 1);
-					else
-						promptText += event.text.unicode;
-					enteredText.setString(promptText.c_str());
 				}
 			}
 
-			promptWindow.clear(sf::Color::White);
+			algorithmWindow.clear(sf::Color::White);
+	
+			for (size_t i {}; i < 2; i++)
+				structures::draw(algorithmWindow, algorithms[i]);
 
-			promptWindow.draw(enteredText);
-
-			promptWindow.display();
+			algorithmWindow.display();
 		}
 
-		return "";
+		return code;
 	}
 
 	//Chooses which action to perform based on the code of the button pressed
@@ -191,30 +192,55 @@ namespace {
 
 		switch (code) {
 
-			case engine::DFS_CODE: 
-				structures::reset(NUM_NODES, nodes);
-				draw();
-				structures::draw(*window, NUM_NODES, nodes, m);
-				engine::DFS(*window, NUM_NODES, nodes, m, end_node, start_node);
-				break;
+			case FIND_PATH_CODE:
+				{
+					std::string fromCode {ge::prompt()};
+					std::string toCode {ge::prompt()};
+					size_t from {}, to {};
+					bool foundFrom {}, foundTo {};
 
-			case engine::BFS_CODE:
-				structures::reset(NUM_NODES, nodes);
-				draw();
-				structures::draw(*window, NUM_NODES, nodes, m);
-				engine::BFS(*window, NUM_NODES, nodes, m, end_node, start_node);
-				break;
+					for (size_t i {}; !(foundFrom && foundTo) && i < NUM_NODES; i++) {
+						if (nodes[i].address.getString().toAnsiString() == fromCode) {
+							from = i;
+							foundFrom = true;
+						}
+						if (nodes[i].address.getString().toAnsiString() == toCode) {
+							to = i;
+							foundTo = true;
+						}
+					}
+					
+					if (foundFrom && foundTo) {
+						structures::reset(NUM_NODES, nodes);
+						draw();
+						structures::draw(*window, NUM_NODES, nodes, m);
+
+						int algorithm_code {getAlgorithm()};
+						switch (algorithm_code) {
+
+							case engine::DFS_CODE: 
+								engine::DFS(*window, NUM_NODES, nodes, m, to, from);
+								break;
+
+							case engine::BFS_CODE:
+								engine::BFS(*window, NUM_NODES, nodes, m, to, from);
+								break;
+						}	
+					}
+
+					break;
+				}
 
 			case LOAD_PRESET_CODE:
 				{
-					std::string filename = prompt();
+					std::string filename = ge::prompt();
 					loadPreset(filename);
 					break;
 				}
 
 			case SAVE_PRESET_CODE:
 				{
-					std::string filename = prompt();
+					std::string filename = ge::prompt();
 					if (filename == "")
 						filename = currentFile;
 
@@ -241,8 +267,8 @@ namespace {
 
 			case ADD_NODE_CODE:
 				{
-					std::string node_group = prompt();
-					std::string node_index = prompt();
+					std::string node_group = ge::prompt();
+					std::string node_index = ge::prompt();
 
 					if (node_group.find_first_not_of("0123456789") != std::string::npos)
 						break;
@@ -294,14 +320,14 @@ namespace {
 			case REMOVE_NODE_CODE:
 				removeNode = !removeNode;
 				if (removeNode)
-					buttons[3].text.setFillColor(sf::Color::Red);
+					buttons[2].text.setFillColor(sf::Color::Red);
 				else
-					buttons[3].text.setFillColor(sf::Color::White);
+					buttons[2].text.setFillColor(sf::Color::White);
 				break;
 
 			case SET_TIME_LINK_CODE:
 				{
-					std::string newTimeLink = prompt();
+					std::string newTimeLink = ge::prompt();
 					if (newTimeLink.find_first_not_of("0123456789.") == std::string::npos)
 						engine::setTimeLink(std::stof(newTimeLink));
 					break;
@@ -328,9 +354,6 @@ namespace {
 int main() {
 
 	init();
-
-	loadPreset("Preset1");
-	engine::setTimeLink(0.75);
 
 	//node that is being dragged around the screen
 	//And initial coordinates of mouse
@@ -431,7 +454,7 @@ int main() {
 										m[from-1][to-1] = 0;
 									//Otherwise create it
 									else {
-										std::string value {prompt()};
+										std::string value {ge::prompt()};
 										if (value.find_first_not_of("0123456789") == std::string::npos && value != "")
 											m[from-1][to-1] = std::stoi(value);
 									}
