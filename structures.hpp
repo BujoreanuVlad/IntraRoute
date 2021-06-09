@@ -16,7 +16,7 @@ namespace structures {
 		float width, height;
 		size_t group, index;
 		sf::RectangleShape rect;
-		//The ip (intranet protocol) address of the code (in the format x.x)
+		//The ip (intranet protocol) address of the code (in the format x.x.)
 		sf::Text address;
 		//Text that shows order of the path taken
 		sf::Text order;
@@ -28,12 +28,6 @@ namespace structures {
 		int code;
 		sf::Text text;
 		sf::RectangleShape rect;
-	};
-
-	struct Edge {
-
-		   Node *from, *to;
-		   int cost;
 	};
 
 	//Default width and height of the nodes' RectangleShape
@@ -53,8 +47,6 @@ namespace structures {
 	//text of each node to an empty text
 	void reset(size_t N, Node nodes[]); 
 	
-	Edge newEdge(Node *from, Node *to, int cost);
-
 	//Constructor, you already know the drill
 	Button newButton(int code, const char c[] = "", float w = width, float h = height);
 	void setPosition(Button &button, float x, float y);

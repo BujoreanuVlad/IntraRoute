@@ -31,17 +31,6 @@ namespace engine {
 	//Shows the path graphically
 	void showPath(sf::RenderWindow &window, structures::Node nodes[], const std::vector<size_t> &path);
 
-	/*
-	  I really shouldn't try to use things I don't understand
-
-	//Template which takes as argument an algorithm (such as DFS or BFS) and uses it on a set of parameters
-	template <typename Function, size_t N>
-	void algorithm(Function func, sf::RenderWindow &window, std::vector<size_t> &v, structures::Node (&nodes)[N], int (&m)[N][N], const size_t end_node, const size_t start_node) {
-
-		func(window, v, nodes, m, end_node, start_node);
-	}
-	*/
-
 	//Actual DFS function which does all the work
 	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t current_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool visited[]); 
 

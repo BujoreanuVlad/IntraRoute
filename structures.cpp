@@ -75,17 +75,6 @@ namespace structures {
 		return text;
 	}
 
-	Edge newEdge(Node *from, Node *to, int cost) {
-
-		   Edge edge;
-
-		   edge.from = from;
-		   edge.to = to;
-		   edge.cost = cost;
-
-		   return edge;
-	}
-
 	Button newButton(int code, const char c[], float width, float height) {
 
 		Button button;
