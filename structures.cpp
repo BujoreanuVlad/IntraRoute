@@ -148,14 +148,32 @@ namespace structures {
         for (size_t i {}; i < N; i++) {
 
             //Drawing the connections between the nodes
-            for (size_t j {}; j < N; j++) {
+            for (size_t j {}; j < i; j++) {
 
                 if (m[i][j]) {
                     
                     auto positioni = nodes[i].rect.getPosition();
                     auto positionj = nodes[j].rect.getPosition();
-                    sf::Vertex line[2] {sf::Vertex(sf::Vector2f(positioni.x + nodes[i].width, positioni.y + nodes[i].height), sf::Color::Red), sf::Vertex(sf::Vector2f(positionj.x, positionj.y), sf::Color::Blue)};
+                    sf::Vertex line[2] {sf::Vertex(sf::Vector2f(positioni.x, positioni.y), sf::Color::Red), sf::Vertex(sf::Vector2f(positionj.x, positionj.y + nodes[j].height), sf::Color::Blue)};
+					sf::Text cost(std::to_string(m[i][j]), font);
+					cost.setCharacterSize(10);
+					cost.setPosition((positioni.x + positionj.x) / 2,
+									(positioni.y + positionj.y) / 2 + nodes[j].height / 2);
                     window.draw(line, 2, sf::Lines);
+					window.draw(cost);
+                }
+
+				if (m[j][i]) {
+
+                    auto positioni = nodes[i].rect.getPosition();
+                    auto positionj = nodes[j].rect.getPosition();
+                    sf::Vertex line[2] {sf::Vertex(sf::Vector2f(positioni.x + nodes[i].width, positioni.y), sf::Color::Blue), sf::Vertex(sf::Vector2f(positionj.x + nodes[j].width, positionj.y + nodes[j].height), sf::Color::Red)};
+					sf::Text cost(std::to_string(m[j][i]), font);
+					cost.setCharacterSize(12);
+					cost.setPosition((positioni.x + positionj.x) / 2 + (nodes[i].width + nodes[j].width) / 2,
+									(positioni.y + positionj.y) / 2 + nodes[j].height / 2);
+                    window.draw(line, 2, sf::Lines);
+					window.draw(cost);
                 }
             }
         }

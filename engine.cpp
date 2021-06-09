@@ -169,6 +169,10 @@ namespace engine {
                     wait();
                 }
 
+                //Reseting the color
+                for (size_t i {}; i < buff_size; i++)
+                    structures::lightUp(nodes[buff[i]]);
+
                 delete[] queue;
                 queue = buff;
                 queue_size = buff_size;
