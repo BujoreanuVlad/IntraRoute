@@ -205,11 +205,11 @@ namespace {
 						switch (algorithm_code) {
 
 							case engine::DFS_CODE: 
-								engine::DFS(*window, NUM_NODES, nodes, m, to, from);
+								engine::DFS(*window, NUM_NODES, nodes, m, from, to);
 								break;
 
 							case engine::BFS_CODE:
-								engine::BFS(*window, NUM_NODES, nodes, m, to, from);
+								engine::BFS(*window, NUM_NODES, nodes, m, from, to);
 								break;
 						}	
 					}

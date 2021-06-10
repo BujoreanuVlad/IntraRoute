@@ -31,16 +31,18 @@ namespace engine {
 	void setTimeLink(const float new_time_link = 1);
 	//Shows the path graphically
 	void showPath(sf::RenderWindow &window, structures::Node nodes[], const std::vector<size_t> &path);
+	//Lights up the start and end nodes if no path is found
+	void failPath(sf::RenderWindow &window, structures::Node &start, structures::Node &end);
 
 	//Actual DFS function which does all the work
-	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t current_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool visited[]); 
+	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t current_node, const size_t end_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool visited[]); 
 
 	//Helper function to call from other translation units which automatically creates all the temporary variables needed.
-	void DFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t end_node = 0, const size_t current_node = 0);
+	void DFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t start_node = 0, const size_t end_node = 0);
 
 	//Reconstructs the path from the BFS function
 	void reconstruct_path(std::vector<size_t> &v, size_t N, int nodes[], int **m, const size_t current_node = 0, const size_t start_node = 0);
 
-	void BFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t end_node = 0, const size_t start_node = 0);
+	void BFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t start_node = 0, const size_t end_node = 0);
 }
 #endif

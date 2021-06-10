@@ -34,7 +34,13 @@ namespace engine {
 		}
 	}
 
-	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t current_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool visited[]) {
+	void failPath(sf::RenderWindow &window, structures::Node &start, structures::Node &end) {
+
+		structures::lightUp(start, sf::Color::Red);
+		structures::lightUp(end, sf::Color::Red);
+	}
+
+	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t current_node, const size_t end_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool visited[]) {
 
         structures::lightUp(nodes[current_node], orange);
         current_path.push_back(current_node);
@@ -68,7 +74,7 @@ namespace engine {
                     m[i][current_node] *= -1;
                     structures::lightUp(nodes[current_node], sf::Color::Red);
 
-                    DFS(window, v, N, nodes, m, end_node, i, total_value, min_value, current_path, visited);
+                    DFS(window, v, N, nodes, m, i, end_node, total_value, min_value, current_path, visited);
 
                     structures::lightUp(nodes[current_node], orange);
                     m[current_node][i] *= -1;
@@ -89,7 +95,7 @@ namespace engine {
         ge::draw(window, N, nodes, m);
     }
 
-	void DFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t current_node) {
+	void DFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t start_node, const size_t end_node) {
 
         int total_value {0};
         unsigned int min_value {static_cast<unsigned>(~0)};
@@ -97,9 +103,12 @@ namespace engine {
 		std::vector<size_t> v;
         bool *visited = new bool[N] {};
 
-        DFS(window, v, N, nodes, m, end_node, current_node, total_value, min_value, current_path, visited);
+        DFS(window, v, N, nodes, m, start_node, end_node, total_value, min_value, current_path, visited);
         structures::reset(N, nodes);
-        showPath(window, nodes, v);
+		if (v.empty())
+			failPath(window, nodes[start_node], nodes[end_node]);
+		else 
+	        showPath(window, nodes, v);
     }
 
     void reconstruct_path(std::vector<size_t> &v, size_t N, int nodes[], int **m, const size_t current_node, const size_t start_node) {
@@ -122,7 +131,7 @@ namespace engine {
         }
     }
 
-	void BFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t start_node) {
+	void BFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t start_node, const size_t end_node) {
 
 		int node_values[N] {};
 		std::vector<size_t> v;
@@ -197,10 +206,12 @@ namespace engine {
         delete[] queue;
         delete[] buff;
 
+		structures::reset(N, nodes);
 		if (pathExists) {
 			reconstruct_path(v, N, node_values, m, end_node, start_node);
-			structures::reset(N, nodes);
 			showPath(window, nodes, v);
 		}
+		else
+			failPath(window, nodes[start_node], nodes[end_node]);
     }	
 }
