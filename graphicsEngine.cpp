@@ -42,4 +42,18 @@ namespace graphicsEngine {
 
         return "";
     }
+
+    void draw(sf::RenderWindow &window, size_t NUM_NODES, structures::Node nodes[], int **m) {
+
+        window.clear(background);
+
+        sf::RectangleShape topBar(sf::Vector2f(width, height / 10));
+        topBar.setPosition(0, 0);
+
+        window.draw(topBar);
+        for (size_t i {}; i < NUM_BUTTONS; i++)
+            structures::draw(window, buttons[i]);
+
+		structures::draw(window, NUM_NODES, nodes, m);
+    }
 }

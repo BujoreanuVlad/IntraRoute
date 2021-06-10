@@ -8,7 +8,7 @@
 //Constants for the window
 const float width {1000};
 const float height {800};
-const size_t NUM_BUTTONS {6};
+extern const size_t NUM_BUTTONS {6};
 
 //Button codes
 const int FIND_PATH_CODE {-1};
@@ -62,19 +62,6 @@ namespace {
 		for (size_t i {1}; i < NUM_BUTTONS; i++)
 			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
 	}	
-
-	//Draws static things for the window
-	void draw() {
-
-		window->clear(background);
-
-		sf::RectangleShape topBar(sf::Vector2f(width, height / 10));
-		topBar.setPosition(0, 0);
-
-		window->draw(topBar);
-		for (size_t i {}; i < NUM_BUTTONS; i++)
-			structures::draw(*window, buttons[i]);
-	}
 
 	//Loads a preset from the Presets/ folder
 	void loadPreset(const std::string &filename) {
@@ -212,8 +199,7 @@ namespace {
 					
 					if (foundFrom && foundTo) {
 						structures::reset(NUM_NODES, nodes);
-						draw();
-						structures::draw(*window, NUM_NODES, nodes, m);
+						ge::draw(*window, NUM_NODES, nodes, m);
 
 						int algorithm_code {getAlgorithm()};
 						switch (algorithm_code) {
@@ -481,8 +467,7 @@ int main() {
 		}
 
 
-		draw();
-		structures::draw(*window, NUM_NODES, nodes, m);
+		ge::draw(*window, NUM_NODES, nodes, m);
 		window->display();
 	}
 

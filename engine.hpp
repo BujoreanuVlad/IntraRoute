@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstring>
 #include "structures.hpp"
+#include "graphicsEngine.hpp"
 #include <SFML/Graphics.hpp>
 #include <ctime>
 

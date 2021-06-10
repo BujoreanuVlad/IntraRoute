@@ -1,4 +1,7 @@
 #include "engine.hpp"
+#include <iostream>
+
+namespace ge = graphicsEngine;
 
 namespace engine {
 
@@ -35,7 +38,7 @@ namespace engine {
 
         structures::lightUp(nodes[current_node], orange);
         current_path.push_back(current_node);
-        structures::draw(window, N, nodes, m);
+        ge::draw(window, N, nodes, m);
 
         wait();
 
@@ -48,7 +51,7 @@ namespace engine {
 
             structures::lightUp(nodes[current_node]);
             current_path.pop_back();
-            structures::draw(window, N, nodes, m);
+            ge::draw(window, N, nodes, m);
             return;
         }
 
@@ -71,7 +74,7 @@ namespace engine {
                     m[current_node][i] *= -1;
                     m[i][current_node] *= -1;
 
-                    structures::draw(window, N, nodes, m);
+                    ge::draw(window, N, nodes, m);
                     wait();
                 }
 
@@ -83,7 +86,7 @@ namespace engine {
         visited[current_node] = false;
         structures::lightUp(nodes[current_node]);
         current_path.pop_back();
-        structures::draw(window, N, nodes, m);
+        ge::draw(window, N, nodes, m);
     }
 
 	void DFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t end_node, const size_t current_node) {
@@ -126,6 +129,7 @@ namespace engine {
         size_t *buff, *queue;
         size_t buff_size {}, queue_size {1};
         size_t index {};
+		bool pathExists {};
         queue = new size_t[1];
         queue[0] = start_node;
         buff = new size_t[N];
@@ -137,7 +141,7 @@ namespace engine {
             if (current_node != end_node) {
 
                 structures::lightUp(nodes[current_node], orange);
-                structures::draw(window, N, nodes, m);
+                graphicsEngine::draw(window, N, nodes, m);
                 wait();
 
                 for (size_t i {}; i < N && current_node != end_node; i++) {
@@ -160,12 +164,15 @@ namespace engine {
                 }
             }
 
+			else
+				pathExists = true;
+
             if (index == queue_size) {
 
                 //Coloring all the nodes to be checked
                 for (size_t i {}; i < buff_size; i++) {
                     structures::lightUp(nodes[buff[i]], sf::Color::Yellow);
-                    structures::draw(window, N, nodes, m);
+                    graphicsEngine::draw(window, N, nodes, m);
                     wait();
                 }
 
@@ -183,15 +190,17 @@ namespace engine {
             }
 
             structures::lightUp(nodes[current_node], sf::Color::Red);
-            structures::draw(window, N, nodes, m);
+            graphicsEngine::draw(window, N, nodes, m);
             wait();
         }
 
         delete[] queue;
         delete[] buff;
 
-        reconstruct_path(v, N, node_values, m, end_node, start_node);
-        structures::reset(N, nodes);
-        showPath(window, nodes, v);
+		if (pathExists) {
+			reconstruct_path(v, N, node_values, m, end_node, start_node);
+			structures::reset(N, nodes);
+			showPath(window, nodes, v);
+		}
     }	
 }
