@@ -185,6 +185,9 @@ namespace {
 					std::string toCode {ge::prompt()};
 					size_t from {}, to {};
 					bool foundFrom {}, foundTo {};
+		
+					if (fromCode == "" || toCode == "")
+						break;
 
 					for (size_t i {}; !(foundFrom && foundTo) && i < NUM_NODES; i++) {
 						if (nodes[i].address.getString().toAnsiString() == fromCode) {
@@ -253,8 +256,12 @@ namespace {
 
 			case ADD_NODE_CODE:
 				{
-					std::string node_group = ge::prompt();
-					std::string node_index = ge::prompt();
+					std::string node_group {ge::prompt()};
+					if (node_group == "")
+						break;
+					std::string node_index {ge::prompt()};
+					if (node_index == "")
+						break;
 
 					if (node_group.find_first_not_of("0123456789") != std::string::npos)
 						break;
@@ -314,6 +321,8 @@ namespace {
 			case SET_TIME_LINK_CODE:
 				{
 					std::string newTimeLink = ge::prompt();
+					if (newTimeLink == "")
+						break;
 					if (newTimeLink.find_first_not_of("0123456789.") == std::string::npos)
 						engine::setTimeLink(std::stof(newTimeLink));
 					break;

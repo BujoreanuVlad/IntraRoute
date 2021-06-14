@@ -32,6 +32,7 @@ namespace structures {
 	void setPosition(Node &node, float x, float y) {
 
 		node.rect.setPosition(x, y);
+		node.address.setPosition(x + node.width / 6, y + node.height / 10);
 		node.order.setPosition(x, y - node.height / 2);
 	}
 
@@ -125,8 +126,7 @@ namespace structures {
 
 		for (size_t i {}; i < N; i++) {
             
-            //Making the text over the rectangle for each node
-            sf::Text text = makeText(nodes[i]);
+            sf::Text text = nodes[i].address;
 
             //Drawing the rectangle and over it the text we just made
             window.draw(nodes[i].rect);

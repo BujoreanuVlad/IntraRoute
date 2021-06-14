@@ -133,7 +133,8 @@ namespace engine {
 
 	void BFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t start_node, const size_t end_node) {
 
-		int node_values[N] {};
+		unsigned int total_sum {static_cast<unsigned> (~(1 << 31))};
+		int *node_values = new int[N] {};
 		std::vector<size_t> v;
         size_t *buff, *queue;
         size_t buff_size {}, queue_size {1};
@@ -165,7 +166,7 @@ namespace engine {
                         int sum {m[current_node][i] + node_values[current_node]};
 
                         //If conditions apply add node to queue
-                        if (sum < node_values[i] || !node_values[i]) {
+                        if ((sum < node_values[i] || !node_values[i]) && sum < total_sum) {
                             node_values[i] = sum;
                             buff[buff_size++] = i;
                         }
@@ -173,8 +174,14 @@ namespace engine {
                 }
             }
 
-			else
+			else {
 				pathExists = true;
+				total_sum = node_values[current_node];
+			}
+
+            structures::lightUp(nodes[current_node], sf::Color::Red);
+            graphicsEngine::draw(window, N, nodes, m);
+            wait();
 
             if (index == queue_size) {
 
@@ -189,6 +196,9 @@ namespace engine {
                 for (size_t i {}; i < buff_size; i++)
                     structures::lightUp(nodes[buff[i]]);
 
+				graphicsEngine::draw(window, N, nodes, m);
+				wait();
+
                 delete[] queue;
                 queue = buff;
                 queue_size = buff_size;
@@ -197,10 +207,6 @@ namespace engine {
                 buff = new size_t[N];
                 buff_size = 0;
             }
-
-            structures::lightUp(nodes[current_node], sf::Color::Red);
-            graphicsEngine::draw(window, N, nodes, m);
-            wait();
         }
 
         delete[] queue;
