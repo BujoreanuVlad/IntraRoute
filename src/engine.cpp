@@ -19,25 +19,27 @@ namespace engine {
 		while ((std::clock() - t) / CLOCKS_PER_SEC < time_link);
 	}
 
-	void showPath(sf::RenderWindow &window, structures::Node nodes[], const std::vector<size_t> &path) {
+	namespace {
+		void showPath(sf::RenderWindow &window, structures::Node nodes[], const std::vector<size_t> &path) {
 
-		for (size_t i{}; i < path.size(); i++) {
+			for (size_t i{}; i < path.size(); i++) {
 
-			structures::Node &tmp {nodes[path[i]]};
-			structures::lightUp(tmp, sf::Color::Green);
-			sf::Text text(std::to_string(i+1), font);
-			auto position = tmp.rect.getPosition();
-			text.setPosition(position.x, position.y - tmp.height / 2);
-			text.setFillColor(sf::Color::Green);
-			text.setCharacterSize((tmp.width + tmp.height) / 150 * 22.5);
-			tmp.order = text;
+				structures::Node &tmp {nodes[path[i]]};
+				structures::lightUp(tmp, sf::Color::Green);
+				sf::Text text(std::to_string(i+1), font);
+				auto position = tmp.rect.getPosition();
+				text.setPosition(position.x, position.y - tmp.height / 2);
+				text.setFillColor(sf::Color::Green);
+				text.setCharacterSize((tmp.width + tmp.height) / 150 * 22.5);
+				tmp.order = text;
+			}
 		}
-	}
 
-	void failPath(sf::RenderWindow &window, structures::Node &start, structures::Node &end) {
+		void failPath(sf::RenderWindow &window, structures::Node &start, structures::Node &end) {
 
-		structures::lightUp(start, sf::Color::Red);
-		structures::lightUp(end, sf::Color::Red);
+			structures::lightUp(start, sf::Color::Red);
+			structures::lightUp(end, sf::Color::Red);
+		}
 	}
 
 	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t current_node, const size_t end_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool visited[]) {
@@ -110,26 +112,38 @@ namespace engine {
 		else 
 	        showPath(window, nodes, v);
     }
+	namespace {
+		void reconstruct_path(std::vector<size_t> &v, size_t N, int nodes[], int **m, const size_t current_node, const size_t start_node) {
 
-    void reconstruct_path(std::vector<size_t> &v, size_t N, int nodes[], int **m, const size_t current_node, const size_t start_node) {
+			if (current_node == start_node) {
+				v.push_back(current_node);
+				return;
+			}
 
-        if (current_node == start_node) {
-            v.push_back(current_node);
-            return;
-        }
+			for (size_t i {}; i < N; i++) {
 
-        for (size_t i {}; i < N; i++) {
+				if (i == current_node)
+					continue;
 
-            if (i == current_node)
-                continue;
+				if (nodes[i] + m[i][current_node] == nodes[current_node]) {
+					reconstruct_path(v, N, nodes, m, i, start_node);
+					v.push_back(current_node);
+					return;
+				}
+			}
+		}
 
-            if (nodes[i] + m[i][current_node] == nodes[current_node]) {
-                reconstruct_path(v, N, nodes, m, i, start_node);
-                v.push_back(current_node);
-                return;
-            }
-        }
-    }
+		void reconstruct_path(std::vector<size_t> &v, size_t previous[], size_t current_node) {
+			
+			if (!previous[current_node]) {
+				v.push_back(current_node);
+				return;
+			}
+
+			reconstruct_path(v, previous, previous[current_node]-1);
+			v.push_back(current_node);
+		}
+	}
 
 	void BFS(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t start_node, const size_t end_node) {
 
@@ -220,4 +234,99 @@ namespace engine {
 		else
 			failPath(window, nodes[start_node], nodes[end_node]);
     }	
+
+	namespace {
+		struct pair {
+			size_t index;
+			int distance;
+		};
+
+		pair poll(std::vector<pair> &v) {
+			
+			pair min {v[0]};
+			size_t index {0};
+
+			for (size_t i {1}; i < v.size(); i++) {
+				if (v[i].distance < min.distance) {
+					min = v[i];
+					index = i;
+				}
+			}
+
+			v.erase(v.begin() + index);
+
+			return min;
+		}
+	}
+
+	void Dijkstra(sf::RenderWindow &window, size_t N, structures::Node nodes[], int **m, const size_t start_node, const size_t end_node) {
+
+		const int MAX {~(1 << 31)};
+
+		int *nodeValues = new int [N];
+		bool *visited = new bool[N] {};
+		size_t *previous = new size_t[N] {};
+		std::vector<pair> pq;
+		{
+			pair p;
+			p.index = start_node;
+			p.distance = 0;
+			pq.push_back(p);
+		}
+
+		for (size_t i {}; i < N; i++)
+			nodeValues[i] = MAX;
+		nodeValues[start_node] = 0;
+
+		while (!pq.empty()) {
+
+			pair buff = poll(pq);			
+			visited[buff.index] = true;
+			structures::lightUp(nodes[buff.index], orange);
+			ge::draw(window, N, nodes, m);
+			wait();
+			if (buff.distance > nodeValues[buff.index])
+				continue; 
+
+			for (size_t i {}; i < N; i++) {
+
+				if (visited[i] || !m[buff.index][i])
+					continue;
+
+				int newDist {m[buff.index][i] + nodeValues[buff.index]};
+				if (newDist < nodeValues[i]) {
+					nodeValues[i] = newDist;
+					previous[i] = buff.index+1;
+					pair p;
+					p.index = i;
+					p.distance = newDist;
+					pq.push_back(p);
+					structures::lightUp(nodes[i], sf::Color::Yellow);
+					ge::draw(window, N, nodes, m);
+					wait();
+				}
+			}
+
+			structures::lightUp(nodes[buff.index], sf::Color::Red);
+			ge::draw(window, N, nodes, m);
+			wait();
+
+			if (buff.index == end_node)
+				break;
+		}
+
+		delete[] nodeValues;
+
+		std::vector<size_t> path;
+		structures::reset(N, nodes);
+
+		if (visited[end_node])
+			reconstruct_path(path, previous, end_node);
+		else
+			failPath(window, nodes[start_node], nodes[end_node]);
+
+		delete[] visited;
+		delete[] previous;
+		showPath(window, nodes, path);
+	}
 }

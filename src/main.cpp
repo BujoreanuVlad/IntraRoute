@@ -131,7 +131,7 @@ namespace {
 	int getAlgorithm() {
 
 		sf::RenderWindow algorithmWindow(sf::VideoMode(300, 600), "Select algorithm");
-		structures::Button algorithms[2];
+		structures::Button algorithms[3];
 		int code {};
 
 		algorithms[0] = structures::newButton(engine::DFS_CODE, "DFS");
@@ -139,6 +139,9 @@ namespace {
 
 		algorithms[1] = structures::newButton(engine::BFS_CODE, "BFS");
 		structures::setPosition(algorithms[1], 100, 200);
+
+		algorithms[2] = structures::newButton(engine::DIJKSTRA_CODE, "Dijkstra", 250);
+		structures::setPosition(algorithms[2], 25, 300);
 
 		while (algorithmWindow.isOpen()) {
 		
@@ -153,10 +156,10 @@ namespace {
 
 					auto position {sf::Mouse::getPosition(algorithmWindow)};
 
-					for (size_t i {}; i < 2; i++) {
+					for (size_t i {}; i < 3; i++) {
 						auto buttonPosition = algorithms[i].rect.getPosition();
-						if ((position.x >= buttonPosition.x && position.x <= buttonPosition.x + buttons[i].width) &&
-							(position.y >= buttonPosition.y && position.y <= buttonPosition.y + buttons[i].height)) {
+						if ((position.x >= buttonPosition.x && position.x <= buttonPosition.x + algorithms[i].width) &&
+							(position.y >= buttonPosition.y && position.y <= buttonPosition.y + algorithms[i].height)) {
 							return algorithms[i].code;
 						}
 					}
@@ -165,7 +168,7 @@ namespace {
 
 			algorithmWindow.clear(sf::Color::White);
 	
-			for (size_t i {}; i < 2; i++)
+			for (size_t i {}; i < 3; i++)
 				structures::draw(algorithmWindow, algorithms[i]);
 
 			algorithmWindow.display();
@@ -213,6 +216,10 @@ namespace {
 
 							case engine::BFS_CODE:
 								engine::BFS(*window, NUM_NODES, nodes, m, from, to);
+								break;
+
+							case engine::DIJKSTRA_CODE:
+								engine::Dijkstra(*window, NUM_NODES, nodes, m, from, to);
 								break;
 						}	
 					}
