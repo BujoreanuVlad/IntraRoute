@@ -482,7 +482,6 @@ int main() {
 
 		}
 
-
 		ge::draw(*window, NUM_NODES, nodes, m);
 		window->display();
 	}
