@@ -20,7 +20,7 @@ const int SET_TIME_LINK_CODE {-6};
 
 sf::RenderWindow *window;
 sf::Font font;
-extern const sf::Color background(70, 75, 70);
+extern const sf::Color background(62, 66, 62);
 structures::Button buttons[NUM_BUTTONS];
 std::string currentFile {""};
 
