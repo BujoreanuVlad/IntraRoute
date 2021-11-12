@@ -46,21 +46,21 @@ namespace {
 		if (!font.loadFromFile("Media/Fonts/Hack-Regular.ttf"))
 			window->close();
 
-		buttons[0] = structures::newButton(FIND_PATH_CODE, "Find path");
-		setPosition(buttons[0], width / 100, height / 80);
+		buttons[0] = structures::Button {FIND_PATH_CODE, "Find path"};
+		buttons[0].setPosition(width / 100, height / 80);
 
-		buttons[1] = structures::newButton(ADD_NODE_CODE, "Add node");
+		buttons[1] = structures::Button {ADD_NODE_CODE, "Add node"};
 
-		buttons[2] = structures::newButton(REMOVE_NODE_CODE, "Remove node");
+		buttons[2] = structures::Button {REMOVE_NODE_CODE, "Remove node"};
 
-		buttons[3] = structures::newButton(LOAD_PRESET_CODE, "Load preset");
+		buttons[3] = structures::Button {LOAD_PRESET_CODE, "Load preset"};
 
-		buttons[4] = structures::newButton(SAVE_PRESET_CODE, "Save preset");
+		buttons[4] = structures::Button {SAVE_PRESET_CODE, "Save preset"};
 
-		buttons[5] = structures::newButton(SET_TIME_LINK_CODE, "Set time link");
+		buttons[5] = structures::Button {SET_TIME_LINK_CODE, "Set time link"};
 
 		for (size_t i {1}; i < NUM_BUTTONS; i++)
-			setPosition(buttons[i], (i+1) * width/100 + i * buttons[0].width, height / 80);
+			buttons[i].setPosition((i+1) * width/100 + i * buttons[0].getWidth(), height / 80);
 	}	
 
 	//Loads a preset from the Presets/ folder
@@ -105,14 +105,14 @@ namespace {
 
 		for (size_t i {}; i < NUM_NODES; i++) {
 
-			int group, index;
+			size_t group, index;
 			float posX, posY;
 			
 			in >> group >> index;
 			in >> posX >> posY;
 
-			nodes[i] = structures::newNode(group, index);
-			structures::setPosition(nodes[i], posX, posY);
+			nodes[i] = structures::Node {group, index};
+			nodes[i].setPosition(posX, posY);
 		}
 
 		in.close();
@@ -122,7 +122,7 @@ namespace {
 	bool checkIfValid(size_t group, size_t index) {
 
 		for (size_t i {}; i < NUM_NODES; i++)
-			if (nodes[i].group == group && nodes[i].index == index)
+			if (nodes[i].getGroup() == group && nodes[i].getIndex() == index)
 				return false;
 
 		return true;
@@ -134,14 +134,14 @@ namespace {
 		structures::Button algorithms[3];
 		int code {};
 
-		algorithms[0] = structures::newButton(engine::DFS_CODE, "DFS");
-		structures::setPosition(algorithms[0], 100, 100);
+		algorithms[0] = structures::Button {engine::DFS_CODE, "DFS"};
+		algorithms[0].setPosition(100, 100);
 
-		algorithms[1] = structures::newButton(engine::BFS_CODE, "BFS");
-		structures::setPosition(algorithms[1], 100, 200);
+		algorithms[1] = structures::Button {engine::BFS_CODE, "BFS"};
+		algorithms[1].setPosition(100, 200);
 
-		algorithms[2] = structures::newButton(engine::DIJKSTRA_CODE, "Dijkstra", 250);
-		structures::setPosition(algorithms[2], 25, 300);
+		algorithms[2] = structures::Button {engine::DIJKSTRA_CODE, "Dijkstra", 250};
+		algorithms[2].setPosition(25, 300);
 
 		while (algorithmWindow.isOpen()) {
 		
@@ -157,10 +157,10 @@ namespace {
 					auto position {sf::Mouse::getPosition(algorithmWindow)};
 
 					for (size_t i {}; i < 3; i++) {
-						auto buttonPosition = algorithms[i].rect.getPosition();
-						if ((position.x >= buttonPosition.x && position.x <= buttonPosition.x + algorithms[i].width) &&
-							(position.y >= buttonPosition.y && position.y <= buttonPosition.y + algorithms[i].height)) {
-							return algorithms[i].code;
+						auto buttonPosition = algorithms[i].getRect().getPosition();
+						if ((position.x >= buttonPosition.x && position.x <= buttonPosition.x + algorithms[i].getWidth()) &&
+							(position.y >= buttonPosition.y && position.y <= buttonPosition.y + algorithms[i].getHeight())) {
+							return algorithms[i].getCode();
 						}
 					}
 				}
@@ -169,7 +169,7 @@ namespace {
 			algorithmWindow.clear(sf::Color::White);
 	
 			for (size_t i {}; i < 3; i++)
-				structures::draw(algorithmWindow, algorithms[i]);
+				algorithms[i].draw(algorithmWindow);
 
 			algorithmWindow.display();
 		}
@@ -193,18 +193,18 @@ namespace {
 						break;
 
 					for (size_t i {}; !(foundFrom && foundTo) && i < NUM_NODES; i++) {
-						if (nodes[i].address.getString().toAnsiString() == fromCode) {
+						if (nodes[i].getAddress().getString().toAnsiString() == fromCode) {
 							from = i;
 							foundFrom = true;
 						}
-						if (nodes[i].address.getString().toAnsiString() == toCode) {
+						if (nodes[i].getAddress().getString().toAnsiString() == toCode) {
 							to = i;
 							foundTo = true;
 						}
 					}
 					
 					if (foundFrom && foundTo) {
-						structures::reset(NUM_NODES, nodes);
+						structures::Node::reset(NUM_NODES, nodes);
 						ge::draw(*window, NUM_NODES, nodes, m);
 
 						int algorithm_code {getAlgorithm()};
@@ -253,8 +253,8 @@ namespace {
 					out << "\n";
 
 					for (size_t i {}; i < NUM_NODES; i++) {
-						auto position {nodes[i].rect.getPosition()};
-						out << nodes[i].group << " " << nodes[i].index << " " << position.x << " " << position.y << "\n";
+						auto position {nodes[i].getRect().getPosition()};
+						out << nodes[i].getGroup() << " " << nodes[i].getIndex() << " " << position.x << " " << position.y << "\n";
 					}
 
 					out.close();
@@ -308,7 +308,7 @@ namespace {
 					}
 					m = m_buff;
 
-					buff[NUM_NODES-1] = structures::newNode(group, index);
+					buff[NUM_NODES-1] = structures::Node {group, index};
 					if (nodes != nullptr) {
 						delete[] nodes;
 						nodes = nullptr;
@@ -320,9 +320,9 @@ namespace {
 			case REMOVE_NODE_CODE:
 				removeNode = !removeNode;
 				if (removeNode)
-					buttons[2].text.setFillColor(sf::Color::Red);
+					buttons[2].setTextFillColor(sf::Color::Red);
 				else
-					buttons[2].text.setFillColor(sf::Color::White);
+					buttons[2].setTextFillColor(sf::Color::White);
 				break;
 
 			case SET_TIME_LINK_CODE:
@@ -342,11 +342,11 @@ namespace {
 
 		for (size_t i {}; i < NUM_BUTTONS; i++) {
 
-			auto position = buttons[i].rect.getPosition();
-			if ((x >= position.x && x <= position.x + buttons[i].width) &&
-				(y >= position.y && y <= position.y + buttons[i].height)) {
+			auto position = buttons[i].getRect().getPosition();
+			if ((x >= position.x && x <= position.x + buttons[i].getWidth()) &&
+				(y >= position.y && y <= position.y + buttons[i].getHeight())) {
 
-				choice(buttons[i].code);
+				choice(buttons[i].getCode());
 				return;
 			}
 		}
@@ -395,7 +395,7 @@ int main() {
 	
 				   for (size_t i {}; i < NUM_NODES; i++) {
 
-						if (structures::isInside(nodes[i], position)) {
+						if (nodes[i].isInside(position)) {
 
 							if (removeNode) {
 
@@ -425,7 +425,7 @@ int main() {
 							}
 							else {
 								node = &(nodes[i]);
-								auto node_position {node->rect.getPosition()};
+								auto node_position {node->getRect().getPosition()};
 								mouse_x_diff = position.x - node_position.x;
 								mouse_y_diff = position.y - node_position.y;
 							}
@@ -442,11 +442,11 @@ int main() {
 
 					for (size_t i {}; i < NUM_NODES; i++) {
 
-						if (structures::isInside(nodes[i], position)) {
+						if (nodes[i].isInside(position)) {
 
 							if (!from) {
 								from = i+1;
-								structures::lightUp(nodes[i], sf::Color::Magenta);
+								nodes[i].lightUp(sf::Color::Magenta);
 							}
 							else {
 								to = i+1;
@@ -462,7 +462,7 @@ int main() {
 									}
 								}
 
-								structures::lightUp(nodes[from-1]);
+								nodes[from-1].lightUp();
 								from = 0;
 								to = 0;
 							}
@@ -477,7 +477,7 @@ int main() {
 
 				sf::Vector2i position {sf::Mouse::getPosition(*window)};
 
-				structures::setPosition(*node, position.x - mouse_x_diff, position.y - mouse_y_diff);
+				node->setPosition(position.x - mouse_x_diff, position.y - mouse_y_diff);
 			}
 
 		}

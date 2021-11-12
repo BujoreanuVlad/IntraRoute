@@ -25,26 +25,26 @@ namespace engine {
 			for (size_t i{}; i < path.size(); i++) {
 
 				structures::Node &tmp {nodes[path[i]]};
-				structures::lightUp(tmp, sf::Color::Green);
+				tmp.lightUp(sf::Color::Green);
 				sf::Text text(std::to_string(i+1), font);
-				auto position = tmp.rect.getPosition();
-				text.setPosition(position.x, position.y - tmp.height / 2);
+				auto position = tmp.getRect().getPosition();
+				text.setPosition(position.x, position.y - tmp.getHeight() / 2);
 				text.setFillColor(sf::Color::Green);
-				text.setCharacterSize((tmp.width + tmp.height) / 150 * 22.5);
-				tmp.order = text;
+				text.setCharacterSize((tmp.getWidth() + tmp.getHeight()) / 150 * 22.5);
+				tmp.setOrder(text);
 			}
 		}
 
 		void failPath(sf::RenderWindow &window, structures::Node &start, structures::Node &end) {
 
-			structures::lightUp(start, sf::Color::Red);
-			structures::lightUp(end, sf::Color::Red);
+			start.lightUp(sf::Color::Red);
+			end.lightUp(sf::Color::Red);
 		}
 	}
 
 	void DFS(sf::RenderWindow &window, std::vector<size_t> &v, size_t N, structures::Node nodes[], int **m, const size_t current_node, const size_t end_node, int &total_value, unsigned int &min_value, std::vector<size_t> &current_path, bool visited[]) {
 
-        structures::lightUp(nodes[current_node], orange);
+        nodes[current_node].lightUp(orange);
         current_path.push_back(current_node);
         ge::draw(window, N, nodes, m);
 
@@ -57,7 +57,7 @@ namespace engine {
                 v = current_path;
             }
 
-            structures::lightUp(nodes[current_node]);
+            nodes[current_node].lightUp();
             current_path.pop_back();
             ge::draw(window, N, nodes, m);
             return;
@@ -74,11 +74,11 @@ namespace engine {
                 if (!visited[i] && total_value < min_value) {
                     m[current_node][i] *= -1;
                     m[i][current_node] *= -1;
-                    structures::lightUp(nodes[current_node], sf::Color::Red);
+                    nodes[current_node].lightUp(sf::Color::Red);
 
                     DFS(window, v, N, nodes, m, i, end_node, total_value, min_value, current_path, visited);
 
-                    structures::lightUp(nodes[current_node], orange);
+                    nodes[current_node].lightUp(orange);
                     m[current_node][i] *= -1;
                     m[i][current_node] *= -1;
 
@@ -92,7 +92,7 @@ namespace engine {
         }
 
         visited[current_node] = false;
-        structures::lightUp(nodes[current_node]);
+        nodes[current_node].lightUp();
         current_path.pop_back();
         ge::draw(window, N, nodes, m);
     }
@@ -106,7 +106,7 @@ namespace engine {
         bool *visited = new bool[N] {};
 
         DFS(window, v, N, nodes, m, start_node, end_node, total_value, min_value, current_path, visited);
-        structures::reset(N, nodes);
+        structures::Node::reset(N, nodes);
 		if (v.empty())
 			failPath(window, nodes[start_node], nodes[end_node]);
 		else 
@@ -164,7 +164,7 @@ namespace engine {
 
             if (current_node != end_node) {
 
-                structures::lightUp(nodes[current_node], orange);
+                nodes[current_node].lightUp(orange);
                 graphicsEngine::draw(window, N, nodes, m);
                 wait();
 
@@ -193,7 +193,7 @@ namespace engine {
 				total_sum = node_values[current_node];
 			}
 
-            structures::lightUp(nodes[current_node], sf::Color::Red);
+            nodes[current_node].lightUp(sf::Color::Red);
             graphicsEngine::draw(window, N, nodes, m);
             wait();
 
@@ -201,14 +201,14 @@ namespace engine {
 
                 //Coloring all the nodes to be checked
                 for (size_t i {}; i < buff_size; i++) {
-                    structures::lightUp(nodes[buff[i]], sf::Color::Yellow);
+                    nodes[buff[i]].lightUp(sf::Color::Yellow);
                     graphicsEngine::draw(window, N, nodes, m);
                     wait();
                 }
 
                 //Reseting the color
                 for (size_t i {}; i < buff_size; i++)
-                    structures::lightUp(nodes[buff[i]]);
+                    nodes[buff[i]].lightUp();
 
 				graphicsEngine::draw(window, N, nodes, m);
 				wait();
@@ -226,7 +226,7 @@ namespace engine {
         delete[] queue;
         delete[] buff;
 
-		structures::reset(N, nodes);
+		structures::Node::reset(N, nodes);
 		if (pathExists) {
 			reconstruct_path(v, N, node_values, m, end_node, start_node);
 			showPath(window, nodes, v);
@@ -236,18 +236,23 @@ namespace engine {
     }	
 
 	namespace {
-		struct pair {
-			size_t index;
-			int distance;
+		class Pair {
+			private:
+				size_t index;
+				int distance;
+			public:
+				Pair(size_t i, int d) : index {i}, distance {d} {}
+				size_t getIndex() const { return index; }
+				int getDistance() const { return distance; }
 		};
 
-		pair poll(std::vector<pair> &v) {
+		Pair poll(std::vector<Pair> &v) {
 			
-			pair min {v[0]};
+			Pair min {v[0]};
 			size_t index {0};
 
 			for (size_t i {1}; i < v.size(); i++) {
-				if (v[i].distance < min.distance) {
+				if (v[i].getDistance()< min.getDistance()) {
 					min = v[i];
 					index = i;
 				}
@@ -266,11 +271,9 @@ namespace engine {
 		int *nodeValues = new int [N];
 		bool *visited = new bool[N] {};
 		size_t *previous = new size_t[N] {};
-		std::vector<pair> pq;
+		std::vector<Pair> pq;
 		{
-			pair p;
-			p.index = start_node;
-			p.distance = 0;
+			Pair p {start_node, 0};
 			pq.push_back(p);
 		}
 
@@ -280,45 +283,43 @@ namespace engine {
 
 		while (!pq.empty()) {
 
-			pair buff = poll(pq);			
-			visited[buff.index] = true;
-			structures::lightUp(nodes[buff.index], orange);
+			Pair buff = poll(pq);			
+			visited[buff.getIndex()] = true;
+			nodes[buff.getIndex()].lightUp(orange);
 			ge::draw(window, N, nodes, m);
 			wait();
-			if (buff.distance > nodeValues[buff.index])
+			if (buff.getDistance() > nodeValues[buff.getIndex()])
 				continue; 
 
 			for (size_t i {}; i < N; i++) {
 
-				if (visited[i] || !m[buff.index][i])
+				if (visited[i] || !m[buff.getIndex()][i])
 					continue;
 
-				int newDist {m[buff.index][i] + nodeValues[buff.index]};
+				int newDist {m[buff.getIndex()][i] + nodeValues[buff.getIndex()]};
 				if (newDist < nodeValues[i]) {
 					nodeValues[i] = newDist;
-					previous[i] = buff.index+1;
-					pair p;
-					p.index = i;
-					p.distance = newDist;
+					previous[i] = buff.getIndex()+1;
+					Pair p {i, newDist};
 					pq.push_back(p);
-					structures::lightUp(nodes[i], sf::Color::Yellow);
+					nodes[i].lightUp(sf::Color::Yellow);
 					ge::draw(window, N, nodes, m);
 					wait();
 				}
 			}
 
-			structures::lightUp(nodes[buff.index], sf::Color::Red);
+			nodes[buff.getIndex()].lightUp(sf::Color::Red);
 			ge::draw(window, N, nodes, m);
 			wait();
 
-			if (buff.index == end_node)
+			if (buff.getIndex() == end_node)
 				break;
 		}
 
 		delete[] nodeValues;
 
 		std::vector<size_t> path;
-		structures::reset(N, nodes);
+		structures::Node::reset(N, nodes);
 
 		if (visited[end_node])
 			reconstruct_path(path, previous, end_node);

@@ -52,8 +52,8 @@ namespace graphicsEngine {
 
         window.draw(topBar);
         for (size_t i {}; i < NUM_BUTTONS; i++)
-            structures::draw(window, buttons[i]);
+            buttons[i].draw(window);
 
-		structures::draw(window, NUM_NODES, nodes, m);
+		structures::Node::draw(window, NUM_NODES, nodes, m);
     }
 }

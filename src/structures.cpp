@@ -10,93 +10,64 @@ namespace {
 
 namespace structures {
 
-	Node newNode(size_t group, size_t index, float width, float height) {
+	void Node::setPosition(float x, float y) {
 
-		Node node;
-
-		node.group = group;
-		node.index = index;
-		node.width = width;
-		node.height = height;
-		sf::RectangleShape rect(sf::Vector2f(width, height));
-		rect.setOutlineColor(sf::Color::Cyan);
-		rect.setOutlineThickness(2);
-		rect.setFillColor(node_bg);
-		rect.setPosition(sf::Vector2f(0, ::height/9));
-		node.rect = rect;
-		node.address = makeText(node);
-
-		return node;
+		rect.setPosition(x, y);
+		address.setPosition(x + width / 6, y + height / 10);
+		order.setPosition(x, y - height / 2);
 	}
 
-	void setPosition(Node &node, float x, float y) {
-
-		node.rect.setPosition(x, y);
-		node.address.setPosition(x + node.width / 6, y + node.height / 10);
-		node.order.setPosition(x, y - node.height / 2);
+	void Node::setOrder(sf::Text &text) {
+		order = text;
 	}
 
-	bool isInside(const Node &node, const sf::Vector2i &position) {
+	bool Node::isInside(const sf::Vector2i &position) const {
 
-		   const auto node_position = node.rect.getPosition();
+		   const auto node_position = rect.getPosition();
 
-		   if (position.x < node_position.x || position.x > node_position.x + node.width)
+		   if (position.x < node_position.x || position.x > node_position.x + width)
 				 return false;
 		   
-		   if (position.y < node_position.y || position.y > node_position.y + node.height)
+		   if (position.y < node_position.y || position.y > node_position.y + height)
 				 return false;
 
 		   return true;
 	}
 
-	void lightUp(Node &node, const sf::Color color) {
+	void Node::lightUp(const sf::Color color) {
 		
-		node.rect.setOutlineColor(color);
+		rect.setOutlineColor(color);
 	}
 
-	void reset(size_t N, Node nodes[]) {
+	void Node::reset(size_t N, Node nodes[]) {
 
 		for (size_t i {}; i < N; i++) {
-			lightUp(nodes[i]);
+			nodes[i].lightUp();
 			nodes[i].order = sf::Text("", font);
 		}
 	}
 
-	sf::Text makeText(const Node &node) {
+	sf::Text Node::makeText() const {
 
 		sf::Text text;
 		text.setFont(font);
 		text.setCharacterSize((width + height) / 150 * 30);
 		text.setFillColor(sf::Color::Green);
 		text.setOutlineColor(sf::Color::Green);
-		text.setString(std::to_string(node.group) + "." + std::to_string(node.index) + ".");
-		auto position = node.rect.getPosition();
+		text.setString(std::to_string(group) + "." + std::to_string(index) + ".");
+		auto position = this->rect.getPosition();
 		text.setPosition(position.x + width / 6, position.y + height / 10);
 
 		return text;
 	}
 
-	Button newButton(int code, const char c[], float width, float height) {
+	void Button::setPosition(float x, float y) {
 
-		Button button;
-
-		button.width = width;
-		button.height = height;
-		button.code = code;
-		button.rect = sf::RectangleShape(sf::Vector2f(width, height));
-		button.rect.setFillColor(background);
-		setText(button, c);
-
-		return button;
+		rect.setPosition(x, y);
+		text.setPosition(x + width / 7, y);
 	}
 
-	void setPosition(Button &button, float x, float y) {
-
-		button.rect.setPosition(x, y);
-		button.text.setPosition(x + button.width / 7, y);
-	}
-
-	void setText(Button &button, std::string text) {
+	void Button::setText(std::string text) {
 
 		size_t words {1};
 		unsigned int max_word_length {};
@@ -111,18 +82,22 @@ namespace structures {
 		sf::Text buttonText(text, font);
 		//buttonText.setCharacterSize((30*4) / text.length());
 		buttonText.setCharacterSize(40 / words);
-		auto currentPosition = button.rect.getPosition();
-		buttonText.setPosition(currentPosition.x - button.width / 5, currentPosition.y - button.height / 5);
-		button.text = buttonText;
+		auto currentPosition = rect.getPosition();
+		buttonText.setPosition(currentPosition.x - width / 5, currentPosition.y - height / 5);
+		this->text = buttonText;
 	}
 
-	void draw(sf::RenderWindow &window, Button &button) {
+	void Button::draw(sf::RenderWindow &window) {
 
-		window.draw(button.rect);
-		window.draw(button.text);
+		window.draw(rect);
+		window.draw(text);
 	}
 
-	void draw(sf::RenderWindow &window, size_t N, Node nodes[], int **m) {
+	void Button::setTextFillColor(const sf::Color &color) {
+		text.setFillColor(color);
+	}
+
+	void Node::draw(sf::RenderWindow &window, size_t N, Node nodes[], int **m) {
 
 		for (size_t i {}; i < N; i++) {
             
