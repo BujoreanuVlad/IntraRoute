@@ -27,7 +27,7 @@ namespace structures {
 			sf::Text order;
 		public:
 			Node() = default;
-			Node (size_t g, size_t i, float w = structures::width, float h = structures::height) : group {g}, index {i}, width {w}, height {h} {}
+			Node (size_t g, size_t i, float w = structures::width, float h = structures::height);
 			//Setting the position of said node
 			void setPosition(float x, float y);
 			void setOrder(sf::Text &text);
@@ -61,9 +61,7 @@ namespace structures {
 
 		public:
 			Button() = default;
-			Button (int code_, const char c[] = "", float w = structures::width, float h = structures::height): code{code_}, width {w}, height {h} {
-				setText(c);
-			}
+			Button (int code_, const char c[] = "", float w = structures::width, float h = structures::height);
 			float getWidth() const { return width; }
 			float getHeight() const { return height; }
 			int getCode() const { return code; }

@@ -1,4 +1,5 @@
 #include "graphicsEngine.hpp"
+#include <iostream>
 
 namespace graphicsEngine {
 
@@ -51,8 +52,9 @@ namespace graphicsEngine {
         topBar.setPosition(0, 0);
 
         window.draw(topBar);
-        for (size_t i {}; i < NUM_BUTTONS; i++)
+        for (size_t i {}; i < NUM_BUTTONS; i++) {
             buttons[i].draw(window);
+		}
 
 		structures::Node::draw(window, NUM_NODES, nodes, m);
     }

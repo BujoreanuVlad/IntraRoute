@@ -1,4 +1,5 @@
 #include "structures.hpp"
+#include <iostream>
 
 extern const sf::Color background;
 
@@ -9,6 +10,15 @@ namespace {
 }
 
 namespace structures {
+
+	Node::Node(size_t g, size_t i, float w, float h) : group {g}, index {i}, width {w}, height {h} {
+		rect = sf::RectangleShape();
+		rect.setSize(sf::Vector2f(width, height));
+		rect.setFillColor(node_bg);
+		rect.setOutlineThickness(1);
+		lightUp();
+		address = makeText();
+	}
 
 	void Node::setPosition(float x, float y) {
 
@@ -61,6 +71,13 @@ namespace structures {
 		return text;
 	}
 
+	Button::Button(int code_, const char c[], float w, float h): code{code_}, width {w}, height {h} {
+		rect = sf::RectangleShape();
+		rect.setSize(sf::Vector2f(w, h));
+		rect.setFillColor(node_bg);
+		setText(c);
+	}
+
 	void Button::setPosition(float x, float y) {
 
 		rect.setPosition(x, y);
@@ -101,11 +118,11 @@ namespace structures {
 
 		for (size_t i {}; i < N; i++) {
             
-            sf::Text text = nodes[i].address;
+            //sf::Text text = nodes[i].address;
 
             //Drawing the rectangle and over it the text we just made
             window.draw(nodes[i].rect);
-            window.draw(text);
+            window.draw(nodes[i].address);
             window.draw(nodes[i].order);
         }
 

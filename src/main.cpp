@@ -309,6 +309,7 @@ namespace {
 					m = m_buff;
 
 					buff[NUM_NODES-1] = structures::Node {group, index};
+					buff[NUM_NODES-1].setPosition(width/10, height/10);
 					if (nodes != nullptr) {
 						delete[] nodes;
 						nodes = nullptr;
